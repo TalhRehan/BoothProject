@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Sticker Booth</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"/>
+</head>
+<body>
+<header class="app-header" role="navigation" aria-label="Primary">
+    <div class="brand" aria-label="App title">Sticker Boot</div>
+    <div class="header-actions">
+        {% block header_actions %}{% endblock %}
+    </div>
+</header>
+<main class="app-main">
+    {% block content %}{% endblock %}
+</main>
+{% block scripts %}{% endblock %}
+</body>
+</html>

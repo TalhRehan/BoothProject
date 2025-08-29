@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block header_actions %}
+<button id="settingsBtn" class="icon-btn" aria-label="Camera settings" title="Settings">
+  <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+    <path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm9.94 3.5a7.94 7.94 0 0 0-.15-1.5l2.06-1.6-2-3.46-2.5 1a8.1 8.1 0 0 0-2.6-1.5L14.3 1h-4.6l-.5 3.44a8.1 8.1 0 0 0-2.6 1.5l-2.5-1-2 3.46 2.05 1.6a7.94 7.94 0 0 0-.15 1.5c0 .5.05 1 .15 1.5L.6 15.1l2 3.45 2.5-1c.77.63 1.63 1.15 2.6 1.5l.5 3.44h4.6l.5-3.44a8.1 8.1 0 0 0 2.6-1.5l2.5 1 2-3.45-2.06-1.6c.1-.5.16-1 .16-1.5ZM12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12Z" />
+  </svg>
+</button>
+{% endblock %}
+
+{% block content %}
+<div class="camera-page">
+    <div class="video-wrap">
+      <video id="video" autoplay playsinline muted></video>
+      <!-- Countdown overlay -->
+      <div id="overlay" class="overlay" style="display:none;">
+        <div id="countdown" class="countdown">5</div>
+      </div>
+      <!-- Floating Capture button on live stream -->
+      <button id="captureBtn" class="capture-fab" aria-label="Capture photo">
+        CAPTURE
+      </button>
+    </div>
+
+
+  <dialog id="settingsModal" class="modal">
+    <form method="dialog">
+      <h3>Camera Settings</h3>
+      <label for="cameraSelect">Video device</label>
+      <select id="cameraSelect"></select>
+      <div class="modal-actions">
+        <button value="cancel" class="ghost-btn">Cancel</button>
+        <button id="applySettings" value="default" class="primary-btn">Apply</button>
+      </div>
+    </form>
+  </dialog>
+
+  <canvas id="captureCanvas" width="1280" height="960" hidden></canvas>
+</div>
+{% endblock %}
+{% block scripts %}
+<!-- Cache-bust with a version to defeat old cached JS -->
+<script src="{{ url_for('static', filename='js/camera.js') }}?v=20250824" defer></script>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block header_actions %}
+  <div>
+    <button id="browserPrintBtn" class="primary-btn">PRINT STICKERS</button>
+    <button id="newSessionBtn" class="ghost-btn">START NEW SESSION</button>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="print-page">
+  <!-- High-res compositor: 2480×3508 ≈ 300 dpi A4. Kept hidden; we print the rasterized PNG below -->
+  <canvas id="a4Canvas" width="2480" height="3508" hidden></canvas>
+
+  <!-- The single element we print. Sized to A4 in CSS (mm), with the PNG the canvas produces -->
+  <figure class="print-sheet" aria-label="Printable A4 sheet">
+    <img id="a4Preview" alt="A4 print preview (2×2 stickers with cut lines)" />
+  </figure>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/print.js') }}" defer></script>
+{% endblock %}

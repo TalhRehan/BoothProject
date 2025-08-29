@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="style-page">
+  <div class="left-pane">
+    <div class="photo-frame">
+      <img src="{{ image_data }}" alt="Captured preview for style" />
+    </div>
+  </div>
+  <div class="right-pane">
+    <h2>Select your sticker style</h2>
+    <p class="tip">Choose one option below, then press Generate. ~30 seconds.</p>
+
+    <div id="styleCards" class="style-cards">
+      <button class="style-card" data-style="realistic_cutout">
+        <div class="style-icon">🎯</div>
+        <div class="style-title">Realistic Cutout</div>
+        <div class="style-desc">Background removed, clean edges, white border.</div>
+      </button>
+
+      <button class="style-card" data-style="cartoonize">
+        <div class="style-icon">🎨</div>
+        <div class="style-title">Cartoonize</div>
+        <div class="style-desc">Convert to cartoon/illustration with smooth lines.</div>
+      </button>
+
+      <button class="style-card" data-style="text_icons">
+        <div class="style-icon">✨</div>
+        <div class="style-title">Text & Icons</div>
+        <div class="style-desc">Overlays like “Super Girl”, “Queen”, crowns & sparkles.</div>
+      </button>
+      <div class="actions">
+      <button id="generateBtn" class="primary-btn" disabled>GENERATE STICKER</button>
+    </div>
+    </div>
+
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.__preselectedStyle = {{ preselected|tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/style.js') }}" defer></script>
+{% endblock %}

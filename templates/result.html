@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="result-page">
+  <h2>Love how it turned out?</h2>
+  <p class="tip">Style used: <strong>{{ style_label }}</strong></p>
+  <div class="compare-grid">
+    <div class="panel">
+      <div class="panel-title">Original</div>
+      <div class="photo-frame large">
+        <img src="{{ original_data }}" alt="Original photo" />
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Generated Sticker</div>
+      <div class="photo-frame large">
+        <img src="{{ generated_data }}" alt="Generated sticker" />
+      </div>
+    </div>
+  </div>
+
+  <p class="subtle">Not quite right? Try regenerating!</p>
+  <div class="controls">
+    <button id="regenBtn" class="ghost-btn">REGENERATE</button>
+    <button id="approveBtn" class="primary-btn">PRINT</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/result.js') }}" defer></script>
+{% endblock %}
