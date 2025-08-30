@@ -1,22 +1,25 @@
+<!-- ============================ review.html (UPDATED) ============================ -->
 {% extends 'base.html' %}
+
 {% block content %}
-  <div class="review-layout">
-    <div class="left-col">
-      <div class="photo-frame">
-        <img src="{{ image_data }}" alt="Captured preview"/>
-      </div>
-    </div>
-    <div class="right-col">
-      <h2>How does this look?</h2>
-      <p class="tip">Select option</p>
-      <div class="controls">
-        <button class="ghost-btn" onclick="window.location.href='{{ url_for('camera') }}'">
-          Retake Photo
-        </button>
-        <button class="primary-btn" onclick="window.location.href='{{ url_for('style_select') }}'">
-          Generate Sticker
-        </button>
-      </div>
+<div class="review-layout">
+  <div class="left-col">
+    <div class="photo-frame">
+      <img src="{{ image_data }}" alt="Captured preview"/>
     </div>
   </div>
+
+  <div class="right-col">
+    <h2>How does this look?</h2>
+    <p class="tip">If it’s not right, retake; otherwise continue to choose a style.</p>
+    <div class="controls">
+      <button class="ghost-btn" onclick="window.location.href='{{ url_for('camera') }}'">
+        Retake photo
+      </button>
+      <button class="primary-btn" onclick="window.location.href='{{ url_for('style_select') }}'">
+        Generate sticker
+      </button>
+    </div>
+  </div>
+</div>
 {% endblock %}
