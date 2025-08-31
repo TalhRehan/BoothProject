@@ -1,65 +1,67 @@
-<!-- ============================ base.html (UPDATED) ============================ -->
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Sticker Booth</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"/>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Sticker Booth</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"/>
 </head>
 <body>
-  <!-- Navbar -->
-  <header class="app-header" role="navigation" aria-label="Primary">
+<!-- Navbar -->
+<header class="app-header" role="navigation" aria-label="Primary">
     <nav class="app-nav">
-      <div class="nav-left">
-        <a class="brand" href="{{ url_for('camera') }}" aria-label="Sticker Booth">Sticker Booth</a>
-      </div>
-
-      <ul class="nav-center">
-        <li><a href="{{ url_for('camera') }}" class="nav-link">Camera</a></li>
-        <li><a href="{{ url_for('style_select') }}" class="nav-link">Styles</a></li>
-        <li><a href="{{ url_for('print_layout') }}" class="nav-link">Print</a></li>
-      </ul>
-
-      <div class="nav-right">
-        <!-- Theme toggle -->
-        <button id="themeToggle" class="icon-btn" aria-pressed="false" aria-label="Toggle theme" title="Toggle theme">
-          <svg id="themeIcon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"></svg>
-        </button>
-
-        <!-- Page-level actions (injected by child templates) -->
-        <div class="header-actions">
-          {% block header_actions %}{% endblock %}
+        <div class="nav-left">
+            <a class="brand" href="{{ url_for('camera') }}" aria-label="Sticker Booth">Sticker Booth</a>
         </div>
-      </div>
+
+        <div class="nav-right">
+            <!-- Theme toggle -->
+            <button id="themeToggle" class="icon-btn" aria-pressed="false" aria-label="Toggle theme"
+                    title="Toggle theme">
+                <img id="themeIcon" alt="Theme" src="{{ url_for('static', filename='img/dark_mode.png') }}">
+            </button>
+
+            <!-- Settings (theme-aware icon) -->
+            <button id="settingsBtn" class="icon-btn" aria-label="Settings" title="Settings">
+                <img id="settingsIcon" alt="Settings"
+                     src="{{ url_for('static', filename='img/darkThemeSettings.png') }}">
+            </button>
+
+            <div class="header-actions">
+                {% block header_actions %}{% endblock %}
+            </div>
+        </div>
     </nav>
-  </header>
+</header>
 
-  <!-- Page content -->
-  <main class="app-main container">
+<main class="app-main container">
     {% block content %}{% endblock %}
-  </main>
+</main>
 
-  <!-- Toast host (safe to keep even if unused yet) -->
-  <div id="toastHost" aria-live="polite" aria-atomic="true"></div>
+<div id="toastHost" aria-live="polite" aria-atomic="true"></div>
 
-  <!-- Theme bootstrap (persisted, respects prefers-color-scheme) -->
-  <script>
+<!-- Theme bootstrap -->
+<script>
     (function(){
       const root = document.documentElement;
       const STORAGE_KEY = 'theme';
       const btn = document.getElementById('themeToggle');
-      const icon = document.getElementById('themeIcon');
+      const iconImg = document.getElementById('themeIcon');
+      const settingsImg = document.getElementById('settingsIcon');
 
-      function setIcon(theme) {
-        icon.innerHTML = theme === 'light'
-          ? '<path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.8 1.42-1.42zM1 13h3v-2H1v2zm10 10h2v-3h-2v3zm7.04-3.95 1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 13h3v-2h-3v2zM11 1h2v3h-2V1zM4.22 18.36l1.8 1.79 1.41-1.41-1.79-1.8-1.42 1.42zM12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/>'
-          : '<path d="M9.37 5.51A7 7 0 0 0 12 19a7 7 0 0 0 6.49-9.37.5.5 0 0 0-.77-.24 6 6 0 1 1-8.11-8.11.5.5 0 0 0-.24-.77A7 7 0 0 0 9.37 5.5z"/>';
+      const LIGHT_ICON = "{{ url_for('static', filename='img/light_mode.png') }}";
+      const DARK_ICON  = "{{ url_for('static', filename='img/dark_mode.png') }}";
+      const LIGHT_SETTINGS = "{{ url_for('static', filename='img/lightThemeSettings.png') }}";
+      const DARK_SETTINGS  = "{{ url_for('static', filename='img/darkThemeSettings.png') }}";
+
+      function setIcons(theme) {
+        iconImg.src = theme === 'light' ? LIGHT_ICON : DARK_ICON;
+        settingsImg.src = theme === 'light' ? LIGHT_SETTINGS : DARK_SETTINGS;
       }
 
       function apply(theme) {
         root.setAttribute('data-theme', theme);
-        setIcon(theme);
+        setIcons(theme);
         btn?.setAttribute('aria-pressed', String(theme === 'dark'));
         try { localStorage.setItem(STORAGE_KEY, theme); } catch {}
       }
@@ -75,43 +77,8 @@
         apply(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
       });
     })();
-  </script>
+</script>
 
-  <!-- Minimal toast helper (replaces alert() nicely; safe no-op if CSS removed) -->
-  <script>
-    (function () {
-      const host = document.getElementById('toastHost');
-      function make(type, msg, ms=3000) {
-        if (!host) return alert(msg);
-        const div = document.createElement('div');
-        div.className = `toast toast-${type}`;
-        div.role = 'status';
-        div.innerHTML = msg;
-        host.appendChild(div);
-        requestAnimationFrame(() => div.classList.add('show'));
-        setTimeout(() => {
-          div.classList.remove('show');
-          setTimeout(() => div.remove(), 350);
-        }, ms);
-      }
-      window.toast = {
-        success: (m,ms)=>make('success', m, ms),
-        error:   (m,ms)=>make('error', m, ms),
-        info:    (m,ms)=>make('info', m, ms)
-      };
-    })();
-    (function(){
-    const root = document.documentElement;
-    const STORAGE_KEY = 'theme';
-    const btn = document.getElementById('themeToggle');
-    const icon = document.getElementById('themeIcon');
-
-    function setIcon(theme) {
-      icon.innerHTML = theme === 'light'
-        ? '<path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.8 1.42-1.42zM1 13h3v-2H1v2zm10 10h2v-3h-2v3zm7.04-3.95 1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 13h3v-2h-3v2zM11 1h2v3h-2V1zM4.22 18.36l1.8 1.79 1.41-1.41-1.79-1.8-1.42 1.42zM12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/>'
-        : '<path d="M9.37 5.51A7 7 0 0 0 12 19a7 7 0 0 0 6.49-9.37.5.5 0 0 0-.77-.24 6 6 0 1 1-8.11-8.11.5.5 0 0 0-.24-.77A7 7 0 0 0 9.37 5.5z"/>';
-    }
-  </script>
-  {% block scripts %}{% endblock %}
+{% block scripts %}{% endblock %}
 </body>
 </html>

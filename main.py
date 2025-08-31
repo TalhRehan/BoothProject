@@ -1,6 +1,6 @@
-# main.py — Sticker Booth (clean, hardened, end-to-end)
+# main.py — Sticker Booth (multi-image, sequential gen, with processing)
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-import base64, uuid, time, os, subprocess, shutil
+import base64, uuid, time, os, subprocess, shutil, threading
 from datetime import datetime
 
 # Optional: load .env if python-dotenv is installed
@@ -21,7 +21,6 @@ app.config.update(
     MAX_CONTENT_LENGTH=5 * 1024 * 1024,  # limit request bodies to ~5MB
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
-    # Set this to "1" in production (HTTPS). Default "0" keeps dev working over http.
     SESSION_COOKIE_SECURE=(os.environ.get("SESSION_COOKIE_SECURE", "0") == "1"),
 )
 
@@ -157,7 +156,7 @@ def style_select():
             return jsonify({"ok": False, "error": "Invalid style"}), 400
         store["selected_style"] = selected
         store["selected_prompt"] = STYLE_PROMPTS[selected]
-        return jsonify({"ok": True, "redirect": url_for("processing")})
+        return jsonify({"ok": True, "redirect": url_for("multi_prompts")})  # → four prompts page
 
     # GET
     b64 = base64.b64encode(img).decode("ascii")
@@ -165,7 +164,155 @@ def style_select():
     return render_template("style.html", image_data=data_url, preselected=store.get("selected_style"))
 
 # -------------------
-# Routes — Page 4: Processing
+# Routes — Page 4: Multi-Prompt page
+# -------------------
+@app.route("/multi")
+def multi_prompts():
+    sid = get_sid()
+    store = STORE.get(sid, {})
+    if not store.get("captured_image"):
+        return redirect(url_for("camera"))
+    if not store.get("selected_style"):
+        return redirect(url_for("style_select"))
+    style_key = store["selected_style"]
+    style_label = STYLE_KEY_TO_HUMAN.get(style_key, style_key)
+    base_prompt = store.get("selected_prompt") or STYLE_PROMPTS.get(style_key, "")
+    return render_template("multi.html", style_label=style_label, base_prompt=base_prompt)
+
+# -------------------
+# Background worker — sequentially generate 4 images
+# -------------------
+def _run_multi_generation(sid, base_prompt, style_key, img, mime, user_prompts):
+    store = STORE.get(sid, {})
+    try:
+        store["gen_status"] = "running"
+        store["gen_progress"] = 0
+        store["gen_error"] = None
+
+        sys_prefix = (
+            "You are an expert sticker-maker. Produce one high-quality PNG suitable for printing stickers. "
+            "Prefer transparent backgrounds when applicable. Keep the subject centered and sharp."
+        )
+
+        images_out = []
+        for i in range(4):
+            # Early cancel check
+            if STORE.get(sid, {}).get("gen_status") == "canceled":
+                return
+
+            merged_prompt = (
+                f"{sys_prefix}\n"
+                f"Style: {STYLE_KEY_TO_HUMAN.get(style_key, style_key)}\n"
+                f"Instructions: {base_prompt}\n\n"
+                f"Additional requirement: {user_prompts[i].strip() or 'No additional requirement.'}"
+            )
+
+            resp = client.images.edit(
+                model="gpt-image-1",
+                image=[("input.png", img)],  # use captured image bytes
+                prompt=merged_prompt,
+                size=os.environ.get("GEN_SIZE", "1024x1024"),
+            )
+
+            # Extract base64 robustly across SDK shapes
+            gen_b64 = None
+            try:
+                gen_b64 = resp.data[0].b64_json
+            except Exception:
+                pass
+            if not gen_b64:
+                try:
+                    out = getattr(resp, "output", None) or getattr(resp, "outputs", None) or []
+                    if out:
+                        content = getattr(out[0], "content", None) or []
+                        for c in content:
+                            if getattr(c, "type", None) in ("output_image", "image"):
+                                gen_b64 = getattr(c, "image_base64", None) or getattr(c, "b64_json", None)
+                                if gen_b64:
+                                    break
+                except Exception:
+                    pass
+            if not gen_b64:
+                try:
+                    gen_b64 = resp.output[0].content[0].image.base64  # type: ignore
+                except Exception:
+                    pass
+            if not gen_b64:
+                raise RuntimeError("No image returned from model")
+
+            images_out.append(base64.b64decode(gen_b64))
+
+            # update progress after each image (25, 50, 75, 100)
+            STORE[sid]["gen_progress"] = int(((i + 1) / 4) * 100)
+
+        store["generated_images"] = images_out
+        store["generated_mime"] = "image/png"
+        store["approved_images"] = images_out  # mark approved for print flow
+        store["approved_mime"] = "image/png"
+        store["gen_status"] = "done"
+        store["ts"] = time.time()
+    except Exception as e:
+        store["gen_status"] = "error"
+        store["gen_error"] = str(e)
+
+# -------------------
+# API — start background generation & go to processing
+# -------------------
+@app.route("/api/generate-multi-start", methods=["POST"])
+def api_generate_multi_start():
+    sid = get_sid()
+    store = STORE.get(sid, {})
+
+    img = store.get("captured_image")
+    mime = store.get("captured_mime", "image/png")
+    style_key = store.get("selected_style")
+    base_prompt = store.get("selected_prompt")
+
+    payload = request.json or {}
+    user_prompts = (payload.get("prompts") or []) + ["", "", "", ""]
+    user_prompts = user_prompts[:4]
+
+    if not img or not style_key or not base_prompt:
+        return jsonify({"ok": False, "error": "Missing input"}), 400
+
+    # initialize status
+    store["gen_status"] = "queued"
+    store["gen_progress"] = 0
+    store["gen_error"] = None
+
+    # spawn background thread — sequential generation
+    t = threading.Thread(
+        target=_run_multi_generation,
+        args=(sid, base_prompt, style_key, img, mime, user_prompts),
+        daemon=True,
+    )
+    t.start()
+
+    return jsonify({"ok": True, "redirect": url_for("processing")})
+
+# -------------------
+# API — poll status / cancel
+# -------------------
+@app.route("/api/gen-status")
+def api_gen_status():
+    sid = get_sid()
+    s = STORE.get(sid, {})
+    return jsonify({
+        "ok": True,
+        "status": s.get("gen_status", "idle"),
+        "progress": int(s.get("gen_progress", 0)),
+        "error": s.get("gen_error"),
+    })
+
+@app.route("/api/gen-cancel", methods=["POST"])
+def api_gen_cancel():
+    sid = get_sid()
+    s = STORE.get(sid, {})
+    s["gen_status"] = "canceled"
+    return jsonify({"ok": True, "redirect": url_for("style_select")})
+
+# -------------------
+# Routes — Processing (kept)
 # -------------------
 @app.route("/processing")
 def processing():
@@ -179,157 +326,38 @@ def processing():
     style_label = STYLE_KEY_TO_HUMAN.get(style_key, style_key)
     return render_template("processing.html", style_label=style_label)
 
-@app.route("/cancel", methods=["POST"])
-def cancel_processing():
-    sid = get_sid()
-    STORE.get(sid, {}).pop("generation_inflight", None)
-    return jsonify({"ok": True, "redirect": url_for("style_select")})
-
-@app.route("/generate", methods=["POST"])
-def generate():
-    """
-    Generate a styled image using the captured input + selected style prompt.
-    Stores the result in-memory and returns redirect URL to /result.
-    """
-    sid = get_sid()
-    store = STORE.get(sid, {})
-
-    img = store.get("captured_image")
-    mime = store.get("captured_mime", "image/png")
-    prompt = store.get("selected_prompt")
-    style_key = store.get("selected_style")
-
-    if not img or not prompt or not style_key:
-        return jsonify({"ok": False, "error": "Missing input"}), 400
-
-    store["generation_inflight"] = True
-
-    # Prepare input image as a data URL for multimodal request
-    b64 = base64.b64encode(img).decode("ascii")
-    data_url = f"data:{mime};base64,{b64}"
-
-    try:
-        # Build rich, style-specific instruction (size/background can be part of prompt)
-        sys_prefix = (
-            "You are an expert sticker-maker. Produce a single high-quality PNG suitable for printing stickers. "
-            "Prefer transparent backgrounds when applicable. Keep the subject centered and sharp."
-        )
-        full_prompt = (
-            f"{sys_prefix}\n"
-            f"Style: {STYLE_KEY_TO_HUMAN.get(style_key, style_key)}\n"
-            f"Instructions: {prompt}"
-        )
-
-        # Minimal request for SDK compatibility (no 'modalities'/'image' kwargs)
-        resp = client.images.edit(
-            model="gpt-image-1",
-            image=[("input.png", img)],  # bytes from captured image
-            prompt=full_prompt,
-            size="1024x1024"
-        )
-        gen_b64 = resp.data[0].b64_json
-        gen_bytes = base64.b64decode(gen_b64)
-
-        # Extract base64 image robustly across SDK shapes
-
-        try:
-            out = getattr(resp, "output", None) or getattr(resp, "outputs", None) or []
-            if out:
-                content = getattr(out[0], "content", None) or []
-                for c in content:
-                    ctype = getattr(c, "type", None)
-                    if ctype in ("output_image", "image"):
-                        gen_b64 = getattr(c, "image_base64", None) or getattr(c, "b64_json", None)
-                        if gen_b64:
-                            break
-        except Exception:
-            pass
-        if not gen_b64:
-            try:
-                gen_b64 = resp.output[0].content[0].image.base64  # type: ignore[attr-defined]
-            except Exception:
-                pass
-        if not gen_b64:
-            raise RuntimeError("No image returned from model")
-
-        gen_bytes = base64.b64decode(gen_b64)
-        store["generated_image"] = gen_bytes
-        store["generated_mime"] = "image/png"
-
-        store.pop("generation_inflight", None)
-        return jsonify({"ok": True, "redirect": url_for("result")})
-    except Exception as e:
-        store.pop("generation_inflight", None)
-        # Clear, UI-friendly error for toast
-        return jsonify({"ok": False, "error": f"Generation error: {str(e)}"}), 502
-
 # -------------------
-# Routes — Page 5: Result Review
-# -------------------
-@app.route("/result")
-def result():
-    sid = get_sid()
-    store = STORE.get(sid, {})
-    if not store.get("captured_image"):
-        return redirect(url_for("camera"))
-    if not store.get("generated_image"):
-        # If user landed here without generation, route appropriately
-        if store.get("selected_style"):
-            return redirect(url_for("processing"))
-        return redirect(url_for("style_select"))
-
-    # Build data URLs for display
-    orig_b64 = base64.b64encode(store["captured_image"]).decode("ascii")
-    orig_mime = store.get("captured_mime", "image/png")
-    gen_b64 = base64.b64encode(store["generated_image"]).decode("ascii")
-    gen_mime = store.get("generated_mime", "image/png")
-
-    style_key = store.get("selected_style")
-    style_label = STYLE_KEY_TO_HUMAN.get(style_key, style_key)
-
-    return render_template(
-        "result.html",
-        original_data=f"data:{orig_mime};base64,{orig_b64}",
-        generated_data=f"data:{gen_mime};base64,{gen_b64}",
-        style_label=style_label,
-    )
-
-@app.route("/regenerate", methods=["POST"])
-def regenerate():
-    sid = get_sid()
-    store = STORE.get(sid, {})
-    # Clear output + selection so user must pick again
-    store.pop("generated_image", None)
-    store.pop("generated_mime", None)
-    store.pop("selected_style", None)
-    store.pop("selected_prompt", None)
-    return jsonify({"ok": True, "redirect": url_for("style_select")})
-
-@app.route("/approve", methods=["POST"])
-def approve():
-    sid = get_sid()
-    store = STORE.get(sid, {})
-    gen = store.get("generated_image")
-    if not gen:
-        return jsonify({"ok": False, "error": "Nothing to approve"}), 400
-    store["approved_image"] = gen
-    store["approved_mime"] = store.get("generated_mime", "image/png")
-    return jsonify({"ok": True, "redirect": url_for("print_layout")})
-
-# -------------------
-# Routes — Page 6: Print Layout
+# Routes — Print Layout (expects 4 images)
 # -------------------
 @app.route("/print-layout")
 def print_layout():
     sid = get_sid()
     store = STORE.get(sid, {})
-    if not store.get("approved_image"):
-        return redirect(url_for("result"))
+    if not store.get("approved_images"):
+        if store.get("selected_style"):
+            return redirect(url_for("multi_prompts"))
+        return redirect(url_for("style_select"))
     return render_template("print.html")
 
+@app.route("/api/approved-list")
+def api_approved_list():
+    sid = get_sid()
+    store = STORE.get(sid, {})
+    imgs = store.get("approved_images")
+    mime = store.get("approved_mime", "image/png")
+    if not imgs or len(imgs) != 4:
+        return jsonify({"ok": False, "error": "No approved images"}), 404
+    data_urls = []
+    for b in imgs:
+        b64 = base64.b64encode(b).decode("ascii")
+        data_urls.append(f"data:{mime};base64,{b64}")
+    return jsonify({"ok": True, "data_urls": data_urls})
+
+# -------------------
+# Printer utils (unchanged)
+# -------------------
 @app.route("/printer-info")
 def printer_info():
-    """Detect default printer via CUPS (lpstat) if available."""
     info = {"available": False, "default": None, "raw": None}
     if shutil.which("lpstat"):
         try:
@@ -350,10 +378,6 @@ def printer_info():
 
 @app.route("/print-direct", methods=["POST"])
 def print_direct():
-    """
-    Accepts composed A4 PNG (base64 data URL) and sends to default CUPS printer.
-    No disk writes; bytes are piped to `lp`.
-    """
     if not shutil.which("lp"):
         return jsonify({"ok": False, "error": "Direct print not available (lp not found). Use browser Print."}), 400
 
@@ -380,9 +404,9 @@ def print_direct():
 
         # On success, free memory for this session
         for key in [
-            "captured_image", "generated_image", "approved_image",
+            "captured_image", "generated_images", "approved_images",
             "selected_style", "selected_prompt", "generated_mime",
-            "approved_mime", "ts"
+            "approved_mime", "ts", "gen_status", "gen_progress", "gen_error"
         ]:
             store.pop(key, None)
         return jsonify({"ok": True, "message": proc.stdout.decode("utf-8", "ignore")})
@@ -392,18 +416,6 @@ def print_direct():
 # -------------------
 # Misc / Utils
 # -------------------
-@app.route("/api/approved")
-def api_approved():
-    """Return approved image as a data URL for the print composer."""
-    sid = get_sid()
-    store = STORE.get(sid, {})
-    img = store.get("approved_image")
-    mime = store.get("approved_mime", "image/png")
-    if not img:
-        return jsonify({"ok": False, "error": "No approved image"}), 404
-    b64 = base64.b64encode(img).decode("ascii")
-    return jsonify({"ok": True, "data_url": f"data:{mime};base64,{b64}"})
-
 @app.errorhandler(413)
 def too_large(_):
     return jsonify({"ok": False, "error": "Payload too large"}), 413
@@ -428,5 +440,4 @@ def start_new():
 # Entrypoint
 # -------------------
 if __name__ == "__main__":
-    # Bind to 0.0.0.0 so you can access from another device on the LAN if needed.
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", "5005")))

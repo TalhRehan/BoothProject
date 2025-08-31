@@ -1,34 +1,41 @@
-<!-- ============================ processing.html (UPDATED) ============================ -->
 {% extends 'base.html' %}
 
 {% block content %}
 <div class="processing-page" aria-busy="true">
-  <h2>AI is working its magic…</h2>
-  <p class="tip">Style: <strong>{{ style_label }}</strong></p>
+  <div class="processing-container">
+    <h2>AI is working its magic…</h2>
+    <p class="tip">Style: <strong>{{ style_label }}</strong></p>
 
-  <div class="progress-wrap">
-    <div id="progressBar"
-         class="progress-bar"
-         role="progressbar"
-         aria-label="Image generation progress"
-         aria-valuemin="0"
-         aria-valuemax="100"
-         aria-valuenow="0">
-      <span id="progressFill" class="progress-fill" style="width:0%"></span>
+    <div class="progress-container">
+      <div id="progressBar"
+           class="progress-bar"
+           role="progressbar"
+           aria-label="Image generation progress"
+           aria-valuemin="0"
+           aria-valuemax="100"
+           aria-valuenow="0">
+        <div id="progressFill" class="progress-fill" style="width:0%"></div>
+      </div>
+      <div class="progress-meta">
+        <span id="progressPct" aria-live="polite" aria-atomic="true">0%</span>
+        <span id="eta" aria-live="polite" aria-atomic="true">~30s remaining</span>
+      </div>
     </div>
-    <div class="progress-meta">
-      <span id="progressPct" aria-live="polite" aria-atomic="true">0%</span>
-      <span id="eta" aria-live="polite" aria-atomic="true">~30s remaining</span>
+
+    <div class="loader" aria-hidden="true"></div>
+
+    <div class="processing-actions">
+      <button id="cancelBtn" class="btn btn-ghost">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="m15 9-6 6M9 9l6 6"/>
+        </svg>
+        Cancel Generation
+      </button>
     </div>
+
+    <p class="subtle">Please keep this window in focus while we generate your stickers.</p>
   </div>
-
-  <div class="loader" aria-hidden="true"></div>
-
-  <div class="actions">
-    <button id="cancelBtn" class="ghost-btn">Cancel</button>
-  </div>
-
-  <p class="subtle">Please keep this window in focus while we generate your sticker.</p>
 </div>
 {% endblock %}
 

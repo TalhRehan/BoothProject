@@ -1,24 +1,18 @@
-<!-- ============================ review.html (UPDATED) ============================ -->
 {% extends 'base.html' %}
-
 {% block content %}
 <div class="review-layout">
-  <div class="left-col">
-    <div class="photo-frame">
-      <img src="{{ image_data }}" alt="Captured preview"/>
+  <div class="photo-container">
+    <div class="photo-frame large">
+      <img src="{{ image_data }}" alt="Captured preview" class="review-image" />
     </div>
   </div>
 
-  <div class="right-col">
-    <h2>How does this look?</h2>
+  <div class="controls-container">
+    <h2 class="review-title">How does this look?</h2>
     <p class="tip">If it’s not right, retake; otherwise continue to choose a style.</p>
     <div class="controls">
-      <button class="ghost-btn" onclick="window.location.href='{{ url_for('camera') }}'">
-        Retake photo
-      </button>
-      <button class="primary-btn" onclick="window.location.href='{{ url_for('style_select') }}'">
-        Generate sticker
-      </button>
+      <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('camera') }}'">Retake</button>
+      <button class="btn btn-primary" onclick="window.location.href='{{ url_for('style_select') }}'">Generate</button>
     </div>
   </div>
 </div>

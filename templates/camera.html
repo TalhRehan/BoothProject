@@ -1,57 +1,194 @@
-<!-- ============================ camera.html (UPDATED) ============================ -->
 {% extends 'base.html' %}
 
-{% block header_actions %}
-<!-- Camera settings button shown in the navbar -->
-<button id="settingsBtn" class="icon-btn" aria-label="Camera settings" title="Settings">
-  <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-    <path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm9.94 3.5a7.94 7.94 0 0 0-.15-1.5l2.06-1.6-2-3.46-2.5 1a8.1 8.1 0 0 0-2.6-1.5L14.3 1h-4.6l-.5 3.44a8.1 8.1 0 0 0-2.6 1.5l-2.5-1-2 3.46 2.05 1.6a7.94 7.94 0 0 0-.15 1.5c0 .5.05 1 .15 1.5L.6 15.1l2 3.45 2.5-1c.77.63 1.63 1.15 2.6 1.5l.5 3.44h4.6l.5-3.44a8.1 8.1 0 0 0 2.6-1.5l2.5 1 2-3.45-2.06-1.6c.1-.5.16-1 .16-1.5ZM12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12Z" />
-  </svg>
-</button>
-{% endblock %}
+{% block title %}Camera - Sticker Booth{% endblock %}
 
 {% block content %}
 <div class="camera-page">
-  <div class="video-wrap">
-    <video id="video" autoplay playsinline muted></video>
+  <!-- Main Camera Interface -->
+  <div class="camera-interface">
+    <!-- Video Container -->
+    <div class="video-container">
+      <video id="video"
+             autoplay
+             playsinline
+             muted
+             aria-label="Camera preview">
+      </video>
 
-    <!-- Countdown overlay -->
-    <div id="overlay" class="overlay" style="display:none;">
-      <div id="countdown" class="countdown">5</div>
+      <!-- Countdown Overlay -->
+      <div id="overlay" class="overlay" style="display: none;" role="status" aria-live="polite">
+        <div id="countdown" class="countdown" aria-label="Countdown">5</div>
+      </div>
+
+      <!-- Capture Button -->
+      <button id="captureBtn"
+              class="capture-fab"
+              type="button"
+              aria-label="Capture photo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        Capture
+      </button>
+    </div>
+    <!-- 👇 camera-status section has been fully removed -->
+  </div>
+
+  <!-- Quick Tips Card -->
+  <div class="card tips-card mt-8">
+    <h3>💡 Quick Tips</h3>
+    <div class="tips-grid">
+      <div class="tip-item">
+        <div class="tip-icon">📸</div>
+        <div class="tip-content">
+          <strong>Good Lighting</strong>
+          <p>Face a window or bright light source for best results</p>
+        </div>
+      </div>
+      <div class="tip-item">
+        <div class="tip-icon">👤</div>
+        <div class="tip-content">
+          <strong>Center Yourself</strong>
+          <p>Keep your face centered in the frame</p>
+        </div>
+      </div>
+      <div class="tip-item">
+        <div class="tip-icon">😊</div>
+        <div class="tip-content">
+          <strong>Smile!</strong>
+          <p>Express yourself - the AI works better with clear expressions</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Professional Settings Modal -->
+<dialog id="settingsModal" class="modal" role="dialog" aria-labelledby="settingsTitle" aria-modal="true">
+  <form method="dialog">
+    <div class="modal-header">
+      <h3 id="settingsTitle">Camera Settings</h3>
+      <p class="modal-subtitle">Adjust your camera preferences for the best experience</p>
     </div>
 
-    <!-- Floating Capture button on live stream -->
-    <button id="captureBtn" class="capture-fab" aria-label="Capture photo">
-      CAPTURE
-    </button>
-  </div>
-
-  <!-- Status row (satisfies camera.js refs) -->
-  <div class="subtle" style="display:flex; gap:12px; align-items:center; margin:8px 4px;">
-    <span id="camStatus">Disconnected</span>
-    <span class="muted">•</span>
-    <span id="resolution">—</span>
-  </div>
-
-  <!-- Settings modal -->
-  <dialog id="settingsModal" class="modal">
-    <form method="dialog">
-      <h3>Camera Settings</h3>
-      <label for="cameraSelect">Video device</label>
-      <select id="cameraSelect"></select>
-      <div class="modal-actions">
-        <button value="cancel" class="ghost-btn">Cancel</button>
-        <button id="applySettings" value="default" class="primary-btn">Apply</button>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="cameraSelect" class="form-label">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          Camera Device
+        </label>
+        <select id="cameraSelect" class="form-select" aria-describedby="cameraHelp">
+          <option value="">Loading cameras...</option>
+        </select>
+        <p id="cameraHelp" class="form-help">Choose which camera to use for capturing photos</p>
       </div>
-    </form>
-  </dialog>
 
-  <!-- Hidden capture canvas -->
-  <canvas id="captureCanvas" width="1280" height="960" hidden></canvas>
-</div>
+      <div class="form-group">
+        <label for="qualitySelect" class="form-label">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <circle cx="9" cy="9" r="2"/>
+            <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+          </svg>
+          Video Quality
+        </label>
+        <select id="qualitySelect" class="form-select" aria-describedby="qualityHelp">
+          <option value="720p">HD (720p) - Recommended</option>
+          <option value="1080p">Full HD (1080p) - Best Quality</option>
+          <option value="480p">SD (480p) - Faster</option>
+        </select>
+        <p id="qualityHelp" class="form-help">Higher quality may be slower on some devices</p>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" value="cancel" class="btn btn-ghost" data-action="cancel">
+        Cancel
+      </button>
+      <button type="button" id="applySettings" value="apply" class="btn btn-primary" data-action="apply">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <polyline points="20,6 9,17 4,12"/>
+        </svg>
+        Apply Settings
+      </button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Hidden Elements -->
+<canvas id="captureCanvas"
+        width="1280"
+        height="960"
+        hidden
+        aria-hidden="true">
+</canvas>
 {% endblock %}
 
 {% block scripts %}
-<!-- Cache-bust with a version to defeat old cached JS -->
-<script src="{{ url_for('static', filename='js/camera.js') }}?v=20250824" defer></script>
+<script src="{{ url_for('static', filename='js/camera.js') }}?v={{ cache_bust_version | default('2024') }}" defer></script>
+
+<!-- Camera Page Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  'use strict';
+
+  // Settings modal management
+  const settingsModal = document.getElementById('settingsModal');
+  const settingsBtn = document.getElementById('settingsBtn');
+
+  if (settingsBtn && settingsModal) {
+    settingsBtn.addEventListener('click', () => {
+      settingsModal.showModal();
+      const firstInput = settingsModal.querySelector('select, input, button');
+      if (firstInput) {
+        setTimeout(() => firstInput.focus(), 100);
+      }
+    });
+    settingsModal.addEventListener('click', (e) => {
+      if (e.target === settingsModal) {
+        settingsModal.close();
+      }
+    });
+    const cancelBtn = settingsModal.querySelector('[data-action="cancel"]');
+    const applyBtn = settingsModal.querySelector('[data-action="apply"]');
+    if (cancelBtn) cancelBtn.addEventListener('click', () => settingsModal.close());
+    if (applyBtn) {
+      applyBtn.addEventListener('click', () => {
+        settingsModal.close();
+        if (window.toast) window.toast.success('Camera settings updated successfully!');
+      });
+    }
+  }
+
+  // Capture button vibration feedback
+  const captureBtn = document.getElementById('captureBtn');
+  if (captureBtn && 'vibrate' in navigator) {
+    captureBtn.addEventListener('click', () => navigator.vibrate(50));
+  }
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if ((e.key === ' ' || e.key === 'Enter') && e.target === document.body) {
+      e.preventDefault();
+      if (captureBtn && !captureBtn.disabled) captureBtn.click();
+    }
+    if (e.key === 'Escape') {
+      if (settingsModal && settingsModal.open) settingsModal.close();
+    }
+  });
+
+  // Page visibility handling
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      if (window.resumeCamera) window.resumeCamera();
+    } else {
+      if (window.pauseCamera) window.pauseCamera();
+    }
+  });
+});
+</script>
 {% endblock %}

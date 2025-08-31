@@ -1,32 +1,26 @@
-<!-- ============================ style.html (UPDATED) ============================ -->
+<!-- ======================= style.html ======================= -->
 {% extends 'base.html' %}
-
 {% block content %}
-<div class="style-page">
+<div class="style-page" style="display:grid; grid-template-columns:1.2fr 1fr; gap:2rem; align-items:center; min-height:calc(100vh - 100px);">
   <div class="left-pane">
-    <div class="photo-frame">
-      <img src="{{ image_data }}" alt="Captured preview for style" />
+    <div class="photo-frame large" style="max-height:70vh; display:flex; align-items:center; justify-content:center;">
+      <img src="{{ image_data }}" alt="Captured preview for style" style="max-height:100%; object-fit:contain;"/>
     </div>
   </div>
 
-  <div class="right-pane">
+  <div class="right-pane" style="display:flex; flex-direction:column; justify-content:center; gap:1rem;">
     <h2>Select your sticker style</h2>
-    <p class="tip">Choose a style and then generate. ~30 seconds.</p>
-
-    <!-- Radiogroup for styles -->
     <div id="styleCards" class="style-cards" role="radiogroup" aria-label="Sticker style selection">
       <button class="style-card" data-style="realistic_cutout" role="radio" aria-checked="false">
         <div class="style-icon">🎯</div>
         <div class="style-title">Realistic cutout</div>
         <div class="style-desc">Background removed, clean edges, white border.</div>
       </button>
-
       <button class="style-card" data-style="cartoonize" role="radio" aria-checked="false">
         <div class="style-icon">🎨</div>
         <div class="style-title">Cartoonize</div>
         <div class="style-desc">Convert to cartoon/illustration with smooth lines.</div>
       </button>
-
       <button class="style-card" data-style="text_icons" role="radio" aria-checked="false">
         <div class="style-icon">✨</div>
         <div class="style-title">Text & icons</div>
@@ -34,16 +28,14 @@
       </button>
     </div>
 
-    <div class="actions">
-      <button id="generateBtn" class="primary-btn" disabled>Generate sticker</button>
+    <div class="actions" style="margin-top:0;">
+      <button id="generateBtn" class="btn btn-primary" style="width:100%;" disabled>Generate sticker</button>
     </div>
   </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
-<script>
-  window.__preselectedStyle = {{ preselected|tojson }};
-</script>
+<script>window.__preselectedStyle = {{ preselected|tojson }};</script>
 <script src="{{ url_for('static', filename='js/style.js') }}" defer></script>
 {% endblock %}

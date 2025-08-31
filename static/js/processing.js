@@ -1,83 +1,71 @@
 // static/js/processing.js
 (function () {
-  const progressFill = document.getElementById('progressFill');
-  const progressPct = document.getElementById('progressPct');
-  const etaText = document.getElementById('eta');
+  const fill = document.getElementById('progressFill');
+  const pctEl = document.getElementById('progressPct');
+  const etaEl = document.getElementById('eta');
   const cancelBtn = document.getElementById('cancelBtn');
-  const progressBar = document.getElementById('progressBar'); // optional ARIA sync
 
-  let pct = 0;
-  let eta = 30; // seconds target
-  let timer = null;
-  let finished = false;
-
-  // Allow cancel to abort the fetch
-  const controller = new AbortController();
+  let visualProgress = 0; // smooth client-side progress
+  let targetProgress = 0; // server-reported progress
+  let polling = true;
 
   function render() {
-    if (progressFill) progressFill.style.width = pct + '%';
-    if (progressPct) progressPct.textContent = Math.round(pct) + '%';
-    if (etaText) etaText.textContent = '~' + Math.max(0, Math.ceil(eta)) + 's remaining';
-    // Keep ARIA in sync if processing.html added role="progressbar"
-    if (progressBar) progressBar.setAttribute('aria-valuenow', String(Math.round(pct)));
+    const diff = targetProgress - visualProgress;
+    visualProgress += Math.sign(diff) * Math.min(Math.abs(diff), 2); // 2% per frame
+    if (fill) fill.style.width = visualProgress + '%';
+    if (pctEl) pctEl.textContent = Math.round(visualProgress) + '%';
+
+    if (etaEl) {
+      const remaining = Math.max(0, 100 - visualProgress);
+      const secs = Math.ceil((remaining / 100) * 40); // ~40s feel
+      etaEl.textContent = `~${secs}s remaining`;
+    }
+
+    if (polling) requestAnimationFrame(render);
   }
 
-  function startProgress() {
-    // Smoothly progress to 90% while generation runs; jump to 100% on completion.
-    timer = setInterval(() => {
-      if (finished) return;
-      const target = 90;
-      const delta = Math.max(0.2, (target - pct) * 0.03); // ease towards 90
-      pct = Math.min(target, pct + delta);
-      eta = Math.max(0, eta - 0.5);
-      render();
-    }, 250);
-  }
-
-  async function runGeneration() {
+  async function poll() {
     try {
-      const res = await fetch('/generate', { method: 'POST', signal: controller.signal });
+      const res = await fetch('/api/gen-status');
       const json = await res.json();
-      finished = true;
-      pct = 100;
-      eta = 0;
-      render();
-      if (json.ok) {
-        window.location.href = json.redirect || '/result';
-      } else {
-        alert('Generation failed: ' + (json.error || 'Unknown error'));
-        window.location.href = '/style';
-      }
-    } catch (e) {
-      finished = true;
-      // If we aborted on purpose, just exit quietly
-      if (e && (e.name === 'AbortError' || e.code === DOMException.ABORT_ERR)) {
+      if (!json.ok) throw new Error('Bad status');
+
+      targetProgress = Number(json.progress || 0);
+
+      if (json.status === 'done') {
+        targetProgress = 100;
+        setTimeout(() => (window.location.href = '/print-layout'), 250);
         return;
       }
-      alert('Network error while generating');
-      window.location.href = '/style';
+      if (json.status === 'error') {
+        alert('Generation failed: ' + (json.error || 'Unknown error'));
+        window.location.href = '/multi';
+        return;
+      }
+      if (json.status === 'canceled') {
+        window.location.href = '/style';
+        return;
+      }
+    } catch (e) {
+      console.error(e);
+      // keep trying
     } finally {
-      clearInterval(timer);
+      if (polling) setTimeout(poll, 1200);
     }
   }
 
-  cancelBtn?.addEventListener('click', async () => {
-    cancelBtn.disabled = true;
-    try {
-      controller.abort(); // stop the in-flight /generate
-    } catch (_) {}
-    try {
-      await fetch('/cancel', { method: 'POST' });
-    } catch (_) {}
-    window.location.href = '/style';
-  });
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', async () => {
+      try {
+        const res = await fetch('/api/gen-cancel', { method: 'POST' });
+        const json = await res.json();
+        if (json.ok && json.redirect) window.location.href = json.redirect;
+      } catch (e) {
+        window.location.href = '/style';
+      }
+    });
+  }
 
-  // Abort if the user navigates away mid-request
-  window.addEventListener('beforeunload', () => {
-    try { controller.abort(); } catch (_) {}
-  });
-
-  render();
-  startProgress();
-  runGeneration();
+  requestAnimationFrame(render);
+  poll();
 })();

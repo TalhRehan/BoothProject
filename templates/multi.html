@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="multi-page">
+  <header class="multi-header">
+    <h2>Write 4 custom prompts</h2>
+    <p class="subtle">Active style: <strong>{{ style_label }}</strong></p>
+  </header>
+
+  <section class="base-prompt">
+    <h3>Base prompt (kept exactly as-is)</h3>
+    <pre class="base-prompt__code" aria-readonly="true">{{ base_prompt }}</pre>
+  </section>
+
+  <form id="multiForm" class="multi-form" novalidate>
+    <div class="prompt-grid">
+      <div class="prompt-field">
+        <label for="p1">Prompt 1</label>
+        <textarea id="p1" name="p1" rows="3" placeholder="e.g., Make sure the person is riding a horse."></textarea>
+      </div>
+      <div class="prompt-field">
+        <label for="p2">Prompt 2</label>
+        <textarea id="p2" name="p2" rows="3" placeholder="e.g., Make sure the person is riding a bicycle."></textarea>
+      </div>
+      <div class="prompt-field">
+        <label for="p3">Prompt 3</label>
+        <textarea id="p3" name="p3" rows="3" placeholder="e.g., Make sure the person is in an airplane."></textarea>
+      </div>
+      <div class="prompt-field">
+        <label for="p4">Prompt 4</label>
+        <textarea id="p4" name="p4" rows="3" placeholder="e.g., Make sure the person is riding a camel."></textarea>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="generateMultiBtn" type="submit" class="btn btn-primary">Generate</button>
+      <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ url_for('style_select') }}'">Back</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/multi.css') }}">
+<script src="{{ url_for('static', filename='js/multi.js') }}" defer></script>
+{% endblock %}
