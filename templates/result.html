@@ -1,32 +1,32 @@
-<!-- ======================= result.html ======================= -->
-{% extends 'base.html' %}
-{% block content %}
-<div class="result-page" style="min-height:calc(100vh - 100px); display:flex; flex-direction:column; justify-content:center; gap:2rem;">
-  <h2>Your Result</h2>
-  <p class="tip">Style: <strong>{{ style_label }}</strong></p>
+<!--&lt;!&ndash; ======================= result.html ======================= &ndash;&gt;-->
+<!--{% extends 'base.html' %}-->
+<!--{% block content %}-->
+<!--<div class="result-page" style="min-height:calc(100vh - 100px); display:flex; flex-direction:column; justify-content:center; gap:2rem;">-->
+<!--  <h2>Your Result</h2>-->
+<!--  <p class="tip">Style: <strong>{{ style_label }}</strong></p>-->
 
-  <div class="compare-grid" style="gap:2rem;">
-    <div class="panel">
-      <div class="panel-title">Original</div>
-      <div class="photo-frame large" style="max-height:60vh;">
-        <img src="{{ original_data }}" alt="Original photo" style="max-height:100%; object-fit:contain;"/>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-title">Generated</div>
-      <div class="photo-frame large" style="max-height:60vh;">
-        <img src="{{ generated_data }}" alt="Generated sticker" style="max-height:100%; object-fit:contain;"/>
-      </div>
-    </div>
-  </div>
+<!--  <div class="compare-grid" style="gap:2rem;">-->
+<!--    <div class="panel">-->
+<!--      <div class="panel-title">Original</div>-->
+<!--      <div class="photo-frame large" style="max-height:60vh;">-->
+<!--        <img src="{{ original_data }}" alt="Original photo" style="max-height:100%; object-fit:contain;"/>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    <div class="panel">-->
+<!--      <div class="panel-title">Generated</div>-->
+<!--      <div class="photo-frame large" style="max-height:60vh;">-->
+<!--        <img src="{{ generated_data }}" alt="Generated sticker" style="max-height:100%; object-fit:contain;"/>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
 
-  <div class="controls" style="gap:0.75rem; margin-top:0;">
-    <button id="regenBtn" class="btn btn-secondary">Regenerate</button>
-    <button id="approveBtn" class="btn btn-primary">Print</button>
-  </div>
-</div>
-{% endblock %}
+<!--  <div class="controls" style="gap:0.75rem; margin-top:0;">-->
+<!--    <button id="regenBtn" class="btn btn-secondary">Regenerate</button>-->
+<!--    <button id="approveBtn" class="btn btn-primary">Print</button>-->
+<!--  </div>-->
+<!--</div>-->
+<!--{% endblock %}-->
 
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/result.js') }}" defer></script>
-{% endblock %}
+<!--{% block scripts %}-->
+<!--<script src="{{ url_for('static', filename='js/result.js') }}" defer></script>-->
+<!--{% endblock %}-->

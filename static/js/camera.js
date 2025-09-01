@@ -1,18 +1,22 @@
 (function () {
   // --- DOM refs ---
-  const video = document.getElementById('video');
-  const countdownEl = document.getElementById('countdown');
-  const overlay = document.getElementById('overlay');
-  const captureBtn = document.getElementById('captureBtn');
-  const camStatus = document.getElementById('camStatus');
-  const resolutionEl = document.getElementById('resolution');
-  const settingsBtn = document.getElementById('settingsBtn');
+  const video         = document.getElementById('video');
+  const countdownEl   = document.getElementById('countdown');
+  const overlay       = document.getElementById('overlay');
+  const captureBtn    = document.getElementById('captureBtn');
+  const camStatus     = document.getElementById('camStatus');
+  const resolutionEl  = document.getElementById('resolution');
+
+  // Settings UI (may or may not exist on this page)
+  const settingsBtn   = document.getElementById('settingsBtn');
   const settingsModal = document.getElementById('settingsModal');
-  const cameraSelect = document.getElementById('cameraSelect');
+  const cameraSelect  = document.getElementById('cameraSelect');
   const applySettings = document.getElementById('applySettings');
+
   const canvas = document.getElementById('captureCanvas');
+  // If core camera elements are missing, exit early—safe on non-camera pages.
   if (!canvas || !video) {
-    console.error('camera.js: missing required DOM elements.');
+    // Not an error in multi-page apps; simply means this page doesn't host the camera UI.
     return;
   }
   const ctx = canvas.getContext('2d');
@@ -34,15 +38,18 @@
 
   function hdLabel(width, height) {
     if (width >= 1920 || height >= 1080) return `${width}×${height} (FHD)`;
-    if (width >= 1280 || height >= 720) return `${width}×${height} (HD)`;
+    if (width >= 1280 || height >= 720)  return `${width}×${height} (HD)`;
     return `${width}×${height} (SD)`;
   }
 
   async function listCameras() {
+    // Guard: not all browsers/devices expose enumerateDevices, or permissions not granted yet.
+    if (!navigator.mediaDevices?.enumerateDevices) return;
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
       const videoInputs = devices.filter(d => d.kind === 'videoinput');
-      if (!cameraSelect) return;
+      if (!cameraSelect) return; // Defensive: settings modal might not be in DOM or on this page.
+
       cameraSelect.innerHTML = '';
       videoInputs.forEach((d, i) => {
         const opt = document.createElement('option');
@@ -50,10 +57,15 @@
         opt.textContent = d.label || `Camera ${i + 1}`;
         cameraSelect.appendChild(opt);
       });
-      const preferred = localStorage.getItem(PREF_KEY);
+
+      const preferred = (() => {
+        try { return localStorage.getItem(PREF_KEY); } catch { return null; }
+      })();
+
       const pick = currentDeviceId || preferred || (videoInputs[0] && videoInputs[0].deviceId);
       if (pick) cameraSelect.value = pick;
     } catch (e) {
+      // Noisy errors (e.g., permissions) shouldn’t break the flow.
       console.warn('enumerateDevices failed', e);
     }
   }
@@ -61,7 +73,7 @@
   function getActiveVideoDeviceId(stream) {
     try {
       const track = stream.getVideoTracks()[0];
-      const settings = track.getSettings ? track.getSettings() : {};
+      const settings = track?.getSettings ? track.getSettings() : {};
       return settings.deviceId || null;
     } catch {
       return null;
@@ -89,12 +101,17 @@
   async function stopCamera() {
     try {
       if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
-    } catch (_) {}
+    } catch { /* no-op */ }
     mediaStream = null;
     setStatus(false);
   }
 
   async function startCamera(deviceId = null) {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      alert('This browser does not support camera access.');
+      return;
+    }
+
     try {
       await stopCamera();
       const constraints = {
@@ -106,7 +123,7 @@
         audio: false
       };
       mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-      currentDeviceId = deviceId;
+      currentDeviceId = deviceId || null;
       video.srcObject = mediaStream;
       await video.play();
       setStatus(true);
@@ -116,6 +133,7 @@
         if (video.readyState >= 2) return resolve();
         video.onloadedmetadata = () => resolve();
       });
+
       if (resolutionEl) {
         resolutionEl.textContent = hdLabel(video.videoWidth, video.videoHeight);
       }
@@ -125,7 +143,7 @@
       const realDeviceId = getActiveVideoDeviceId(mediaStream) || deviceId;
       if (realDeviceId) {
         currentDeviceId = realDeviceId;
-        localStorage.setItem(PREF_KEY, realDeviceId);
+        try { localStorage.setItem(PREF_KEY, realDeviceId); } catch {}
         if (cameraSelect) cameraSelect.value = realDeviceId;
       }
     } catch (err) {
@@ -167,7 +185,7 @@
 
   async function captureFrame() {
     if (!video || !canvas || !ctx) return;
-    const vw = video.videoWidth || 1280;
+    const vw = video.videoWidth  || 1280;
     const vh = video.videoHeight || 960;
     const cw = canvas.width;
     const ch = canvas.height;
@@ -207,19 +225,20 @@
     if (e.key && e.key.toLowerCase() === 'c') startCountdown();
   });
 
+  // Settings modal is now globally wired in base.html, but keeping these is safe (no-ops if absent)
   settingsBtn?.addEventListener('click', () => {
-    try { settingsModal?.showModal(); } catch {}
+    try { settingsModal?.showModal?.(); } catch { /* no-op */ }
   });
 
   applySettings?.addEventListener('click', async (e) => {
     e.preventDefault();
-    try { settingsModal?.close(); } catch {}
-    const newId = cameraSelect?.value || null;
+    try { settingsModal?.close?.(); } catch { /* no-op */ }
+    const newId = cameraSelect?.value || null; // ✅ Guarded: only read if it exists
     await startCamera(newId);
   });
 
   // Update camera list on USB plug/unplug
-  if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
+  if (navigator.mediaDevices?.addEventListener) {
     navigator.mediaDevices.addEventListener('devicechange', async () => {
       await listCameras();
       const options = Array.from(cameraSelect?.options || []).map(o => o.value);
@@ -245,7 +264,7 @@
     if (overlay) overlay.style.display = 'none';
 
     // 2) Nuke any stale retake flags (from earlier versions)
-    try { sessionStorage.removeItem('autoRetake'); } catch (_) {}
+    try { sessionStorage.removeItem('autoRetake'); } catch { /* no-op */ }
 
     // 3) Strip any ?auto=... param so reloads don't retrigger behavior
     try {
@@ -254,11 +273,13 @@
         url.searchParams.delete('auto');
         history.replaceState({}, '', url.pathname + (url.search ? '?' + url.searchParams.toString() : '') + url.hash);
       }
-    } catch (_) {}
+    } catch { /* no-op */ }
 
-    const preferred = localStorage.getItem(PREF_KEY);
+    const preferred = (() => {
+      try { return localStorage.getItem(PREF_KEY); } catch { return null; }
+    })();
+
     await startCamera(preferred || null);
-
-    // IMPORTANT: No auto-start. User must click CAPTURE (or press "c").
+    // IMPORTANT: No auto-start of capture—user must click CAPTURE (or press "c").
   });
 })();

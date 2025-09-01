@@ -5,13 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Sticker Booth</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"/>
+
+    <!-- Script font (Instagram-like) -->
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
 </head>
 <body>
 <!-- Navbar -->
 <header class="app-header" role="navigation" aria-label="Primary">
     <nav class="app-nav">
-        <div class="nav-left">
-            <a class="brand" href="{{ url_for('camera') }}" aria-label="Sticker Booth">Sticker Booth</a>
+        <div class="nav-left" aria-hidden="true"></div>
+
+        <div class="nav-center">
+          <a class="brand" href="{{ url_for('camera') }}" aria-label="Sticker Booth">
+              <svg viewBox="0 0 320 80" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sticker Booth">
+                <defs>
+                  <linearGradient id="brandGradient" x1="0" y1="0" x2="320" y2="0" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#667eea"/>
+                    <stop offset="1" stop-color="#764ba2"/>
+                  </linearGradient>
+                </defs>
+                <!-- Wordmark only (Instagram-like script) -->
+                <text x="0" y="52"
+                      font-family="'Pacifico', cursive"
+                      font-size="42"
+                      font-weight="400"
+                      fill="url(#brandGradient)">
+                  Sticker Booth
+                </text>
+              </svg>
+          </a>
         </div>
 
         <div class="nav-right">
@@ -39,6 +61,62 @@
 </main>
 
 <div id="toastHost" aria-live="polite" aria-atomic="true"></div>
+
+<!-- Settings Modal (shared across pages) -->
+<dialog id="settingsModal" class="modal" role="dialog" aria-labelledby="settingsTitle" aria-modal="true">
+    <form method="dialog">
+        <div class="modal-header">
+            <h3 id="settingsTitle">Camera Settings</h3>
+            <p class="modal-subtitle">Adjust your camera preferences for the best experience</p>
+        </div>
+
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="cameraSelect" class="form-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         aria-hidden="true">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                        <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                    Camera Device
+                </label>
+                <select id="cameraSelect" class="form-select" aria-describedby="cameraHelp">
+                    <option value="">Loading cameras...</option>
+                </select>
+                <p id="cameraHelp" class="form-help">Choose which camera to use for capturing photos</p>
+            </div>
+
+            <div class="form-group">
+                <label for="qualitySelect" class="form-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         aria-hidden="true">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="9" cy="9" r="2"/>
+                        <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                    </svg>
+                    Video Quality
+                </label>
+                <select id="qualitySelect" class="form-select" aria-describedby="qualityHelp">
+                    <option value="720p">HD (720p) - Recommended</option>
+                    <option value="1080p">Full HD (1080p) - Best Quality</option>
+                    <option value="480p">SD (480p) - Faster</option>
+                </select>
+                <p id="qualityHelp" class="form-help">Higher quality may be slower on some devices</p>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" value="cancel" class="btn btn-ghost" data-action="cancel">Cancel</button>
+            <button type="button" id="applySettings" value="apply" class="btn btn-primary" data-action="apply">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     aria-hidden="true">
+                    <polyline points="20,6 9,17 4,12"/>
+                </svg>
+                Apply Settings
+            </button>
+        </div>
+    </form>
+</dialog>
 
 <!-- Theme bootstrap -->
 <script>
@@ -77,6 +155,37 @@
         apply(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
       });
     })();
+</script>
+
+<!-- Settings modal wiring (site-wide) -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const settingsBtn = document.getElementById('settingsBtn');
+      const settingsModal = document.getElementById('settingsModal');
+      if (!settingsBtn || !settingsModal || !settingsModal.showModal) return;
+
+      settingsBtn.addEventListener('click', () => {
+        settingsModal.showModal();
+        const firstInput = settingsModal.querySelector('select, input, button');
+        if (firstInput) setTimeout(() => firstInput.focus(), 100);
+      });
+
+      settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) settingsModal.close();
+      });
+
+      const cancelBtn = settingsModal.querySelector('[data-action="cancel"]');
+      const applyBtn  = settingsModal.querySelector('[data-action="apply"]');
+      cancelBtn?.addEventListener('click', () => settingsModal.close());
+      applyBtn?.addEventListener('click', () => {
+        settingsModal.close();
+        if (window.toast) window.toast.success('Camera settings updated successfully!');
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && settingsModal.open) settingsModal.close();
+      });
+    });
 </script>
 
 {% block scripts %}{% endblock %}
