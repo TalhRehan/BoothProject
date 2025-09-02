@@ -1,42 +1,86 @@
 <!-- ======================= style.html ======================= -->
 {% extends 'base.html' %}
+{# Inherit base layout for consistent structure and styling. #}
+
 {% block content %}
 <div class="style-page two-col">
+  {# Main container with a two-column layout (left = preview, right = styles). #}
+
   <div class="left-pane">
-    <!-- unified frame (same as review) -->
+    <!-- Preview photo in a styled frame (same component as review page) -->
     <div class="photo-frame large frame">
-      <img src="{{ image_data }}" alt="Captured preview for style" class="frame-image"/>
+      <img src="{{ image_data }}"
+           alt="Captured preview for style"
+           class="frame-image"/>
+      {# `image_data` holds the captured image (base64 string or URL). #}
     </div>
   </div>
 
   <div class="right-pane">
-    <h2>Select your sticker style</h2>
-    <div id="styleCards" class="style-cards" role="radiogroup" aria-label="Sticker style selection">
-      <button class="style-card" data-style="realistic_cutout" role="radio" aria-checked="false">
+    <!-- Page heading -->
+    <h2 data-i18n="style.title">Select your sticker style</h2>
+
+    <!-- Style options displayed as cards (radiogroup for accessibility) -->
+    <div id="styleCards"
+         class="style-cards"
+         role="radiogroup"
+         aria-label="Sticker style selection">
+
+      <!-- Option 1: Realistic cutout -->
+      <button class="style-card"
+              data-style="realistic_cutout"
+              role="radio"
+              aria-checked="false">
         <div class="style-icon">🎯</div>
-        <div class="style-title">Realistic cutout</div>
-        <div class="style-desc">Background removed, clean edges, white border.</div>
+        <div class="style-title" data-i18n="style.realisticCutout">Realistic cutout</div>
+        <div class="style-desc" data-i18n="style.realisticCutoutDesc">
+          Background removed, clean edges, white border.
+        </div>
       </button>
-      <button class="style-card" data-style="cartoonize" role="radio" aria-checked="false">
+
+      <!-- Option 2: Cartoonize -->
+      <button class="style-card"
+              data-style="cartoonize"
+              role="radio"
+              aria-checked="false">
         <div class="style-icon">🎨</div>
-        <div class="style-title">Cartoonize</div>
-        <div class="style-desc">Convert to cartoon/illustration with smooth lines.</div>
+        <div class="style-title" data-i18n="style.cartoonize">Cartoonize</div>
+        <div class="style-desc" data-i18n="style.cartoonizeDesc">
+          Convert to cartoon/illustration with smooth lines.
+        </div>
       </button>
-      <button class="style-card" data-style="text_icons" role="radio" aria-checked="false">
+
+      <!-- Option 3: Text & icons -->
+      <button class="style-card"
+              data-style="text_icons"
+              role="radio"
+              aria-checked="false">
         <div class="style-icon">✨</div>
-        <div class="style-title">Text & icons</div>
-        <div class="style-desc">Overlays like “Super Girl”, “Queen”, crowns & sparkles.</div>
+        <div class="style-title" data-i18n="style.textIcons">Text & icons</div>
+        <div class="style-desc" data-i18n="style.textIconsDesc">
+          Overlays like “Super Girl”, “Queen”, crowns & sparkles.
+        </div>
       </button>
     </div>
 
+    <!-- Generate button (initially disabled until a style is selected) -->
     <div class="actions" style="margin-top:0;">
-      <button id="generateBtn" class="btn btn-primary" style="width:100%;" disabled>Generate sticker</button>
+      <button id="generateBtn"
+              class="btn btn-primary"
+              style="width:100%;"
+              disabled
+              data-i18n="style.generateSticker">
+        Generate sticker
+      </button>
     </div>
   </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
+<!-- Preselected style is passed from backend as JSON -->
 <script>window.__preselectedStyle = {{ preselected|tojson }};</script>
+
+<!-- JavaScript logic for style selection & enabling the generate button -->
 <script src="{{ url_for('static', filename='js/style.js') }}" defer></script>
 {% endblock %}

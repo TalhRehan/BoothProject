@@ -1,12 +1,24 @@
 {% extends 'base.html' %}
+{# This template inherits from base.html so it shares layout and styles. #}
 
 {% block content %}
 <div class="processing-page" aria-busy="true">
-  <div class="processing-container">
-    <h2>AI is working its magic…</h2>
-    <p class="tip">Style: <strong>{{ style_label }}</strong></p>
+  {# Main container that indicates the page is in a "processing" state.
+     aria-busy="true" helps screen readers know content is still loading. #}
 
+  <div class="processing-container">
+    <!-- Page heading -->
+    <h2 data-i18n="processing.title">AI is working its magic…</h2>
+
+    <!-- Display chosen style label -->
+    <p class="tip">
+      <span data-i18n="processing.style">Style:</span>
+      <strong>{{ style_label }}</strong>
+    </p>
+
+    <!-- Progress bar wrapper -->
     <div class="progress-container">
+      <!-- Accessible progress bar element -->
       <div id="progressBar"
            class="progress-bar"
            role="progressbar"
@@ -14,31 +26,40 @@
            aria-valuemin="0"
            aria-valuemax="100"
            aria-valuenow="0">
+        <!-- Inner fill that grows as progress updates -->
         <div id="progressFill" class="progress-fill" style="width:0%"></div>
       </div>
+
+      <!-- Progress percentage and ETA -->
       <div class="progress-meta">
         <span id="progressPct" aria-live="polite" aria-atomic="true">0%</span>
-        <span id="eta" aria-live="polite" aria-atomic="true">~30s remaining</span>
+        <span id="eta" aria-live="polite" aria-atomic="true" data-i18n-suffix="processing.remaining">~30s remaining</span>
       </div>
     </div>
 
+    <!-- Animated loader (likely CSS spinner), hidden from screen readers -->
     <div class="loader" aria-hidden="true"></div>
 
+    <!-- Cancel button with accessible icon + label -->
     <div class="processing-actions">
       <button id="cancelBtn" class="btn btn-ghost">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10"/>
           <path d="m15 9-6 6M9 9l6 6"/>
         </svg>
-        Cancel Generation
+        <span data-i18n="processing.cancel">Cancel Generation</span>
       </button>
     </div>
 
-    <p class="subtle">Please keep this window in focus while we generate your stickers.</p>
+    <!-- Small note reminding users not to switch tabs/windows -->
+    <p class="subtle" data-i18n="processing.keepFocus">
+      Please keep this window in focus while we generate your stickers.
+    </p>
   </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
+<!-- Attach JavaScript for handling progress, ETA updates, and cancel button -->
 <script src="{{ url_for('static', filename='js/processing.js') }}" defer></script>
 {% endblock %}

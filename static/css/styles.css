@@ -1,4 +1,4 @@
-
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;600;700&display=swap');
 :root{
   /* Core Brand Colors */
   --brand-primary: #6366f1;
@@ -8,8 +8,7 @@
   /* Gradients */
   --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --gradient-secondary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-  --gradient-surface: linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+
 
   /* Typography Scale */
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -146,6 +145,7 @@ body{
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+   overscroll-behavior: none;
 }
 
 /* ---------- Typography ---------- */
@@ -208,7 +208,7 @@ p{
         max-width: 1400px;
         margin: 0 auto;
         padding: var(--space-4) var(--space-6);
-        height: 72px;
+        height: 85px;
         position: relative;
       }
 /* Center the brand perfectly with a 3-column grid */
@@ -502,17 +502,20 @@ video{
 
 
 .countdown{
-  font-size: clamp(4rem, 12vw, 8rem);
-  font-weight: 900;
-  color: white;
-  text-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  font-size: clamp(1.25rem, 3.5vw, 2rem); /* ~20–32px instead of huge */
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);        /* 50% transparent */
+  text-shadow: none;                      /* remove heavy glow */
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
   animation: countdownPulse 1s ease-in-out;
 }
 
 @keyframes countdownPulse {
-  0% { transform: scale(0.8); opacity: 0; }
-  50% { transform: scale(1.1); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
+  0%   { transform: scale(0.9); opacity: 0; }
+  50%  { transform: scale(1.05); opacity: 0.65; }
+  100% { transform: scale(1);    opacity: 0.5; }
 }
 
 
@@ -637,7 +640,7 @@ video{
 .modal{
   background: var(--card-bg);
   border: 1px solid var(--border-secondary);
-  border-radius: var(--radius-2xl);
+
   padding: var(--space-8);
   box-shadow: var(--shadow-2xl);
   backdrop-filter: blur(20px);
@@ -716,25 +719,7 @@ video{
 
 
 
-.compare-grid{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-10);
-  margin-top: var(--space-10);
-}
 
-.panel{
-  text-align: center;
-}
-
-.panel-title{
-  font-size: var(--fs-lg);
-  font-weight: 700;
-  color: var(--brand-primary);
-  margin-bottom: var(--space-6);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
 
 .controls{
   margin-top: var(--space-8);
@@ -745,13 +730,7 @@ video{
   flex-wrap: wrap;
 }
 
-.photo-container{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  padding: var(--space-8);
-}
+
 
 .photo-container::before{
   /* was: dashed border background – disable it */
@@ -812,32 +791,6 @@ video{
 
 
 
-.action-buttons .btn{
-  flex: 1;
-  padding: var(--space-5) var(--space-8);
-  font-size: var(--fs-lg);
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  border-radius: var(--radius-xl);
-  position: relative;
-  overflow: hidden;
-}
-
-.action-buttons .btn-secondary{
-  background: var(--surface-elevated);
-  border: 2px solid var(--border-secondary);
-}
-
-.action-buttons .btn-primary{
-  background: var(--gradient-primary);
-  border: 2px solid transparent;
-  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
-}
-
-.action-buttons .btn-primary:hover{
-  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
-  transform: translateY(-3px);
-}
 
 .review-title{
   font-size: var(--fs-4xl);
@@ -928,7 +881,7 @@ video{
 }
 
 /* ---------- Result & Print Pages ---------- */
-.result-page,
+/* .result-page, */
 .print-page{
   margin-top: var(--space-8);
   text-align: center;
@@ -1004,7 +957,7 @@ video{
 
 /* ---------- Focus States (Accessibility) ---------- */
 .btn:focus-visible,
-.nav-link:focus-visible,
+/* .nav-link:focus-visible, */
 .style-card:focus-visible,
 select:focus-visible,
 #themeToggle:focus-visible,
@@ -1021,6 +974,7 @@ a:focus-visible{
   }
 
   .app-nav {
+    position: relative;
     padding: var(--space-4);
   }
 
@@ -1042,10 +996,6 @@ a:focus-visible{
   gap: var(--space-3);
 }
 
-.compare-grid {
-  grid-template-columns: 1fr;
-  gap: var(--space-8);
-}
 
 
 
@@ -1057,57 +1007,132 @@ a:focus-visible{
 }
 
 @media (max-width: 768px) {
-  .app-nav {
+    .app-nav {
+    grid-template-columns: auto 1fr auto;
     padding: var(--space-3) var(--space-4);
-    height: 64px;
+    height: 76px;
+    gap: var(--space-4);
   }
 
   .app-main {
-    padding-top: 80px;
+    padding-top: 100px; /* Account for taller nav */
+  }
+  .nav-right {
+    gap: var(--space-4);
   }
 
-  .brand {
-    font-size: var(--fs-xl);
+  .brand-text {
+    font-size: 1.3rem;
+    letter-spacing: 0.5px;
+  }
+
+  /* Two-column layout becomes single column */
+  .two-col,
+  .review-layout {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    padding: var(--space-6) var(--space-4);
+  }
+
+  /* Video container adjustments */
+  .video-container {
+    margin-bottom: var(--space-6);
+    border-radius: var(--radius-xl);
+  }
+
+  video {
+    min-height: 300px;
+    max-height: 50vh;
+  }
+
+  /* Controls container improvements */
+  .controls-container {
+    padding: var(--space-6) var(--space-4);
+    gap: var(--space-6);
   }
 
   .controls {
     flex-direction: column;
-    align-items: stretch;
+    gap: var(--space-3);
   }
 
   .btn {
     width: 100%;
     justify-content: center;
+    padding: var(--space-4) var(--space-5);
+    font-size: var(--fs-base);
+  }
+  .icon-btn {
+    width: 42px;
+    height: 42px;
+    background: var(--surface-secondary);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 
+  /* Style cards - single column */
+  .style-cards {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .style-card {
+    padding: var(--space-5);
+    min-height: 100px;
+  }
+
+  /* Modal improvements */
   .modal {
     padding: var(--space-6);
     width: 95vw;
+    border-radius: var(--radius-xl);
   }
 
   .modal-actions {
     flex-direction: column;
+    gap: var(--space-3);
   }
 
   .modal-actions .btn {
     width: 100%;
   }
 
-  #toastHost {
-    left: var(--space-4);
-    right: var(--space-4);
-    top: var(--space-4);
+  /* Processing container */
+  .processing-container {
+    padding: var(--space-8) var(--space-5);
+    margin: var(--space-4);
   }
 
+  /* Form improvements */
+  .prompt-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+  #themeToggle {
+    width: 42px;
+    height: 42px;
+    background: var(--surface-secondary);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  /* Professional capture button */
+  .capture-fab {
+    width: 68px;
+    height: 68px;
+    background: var(--gradient-secondary);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4);
+  }
 
-  .processing-container {
-  padding: var(--space-8) var(--space-6);
-  margin: var(--space-6) var(--space-4);
-}
+  .capture-fab::after {
+    content: "📸";
+    font-size: 22px;
+  }
 
-.processing-actions .btn {
-  width: 100%;
-}
+  .capture-fab:hover {
+    transform: translateX(-50%) translateY(-4px) scale(1.05);
+    box-shadow: 0 12px 40px rgba(99, 102, 241, 0.6);
+  }
 }
 
 @media (max-width: 480px) {
@@ -1130,7 +1155,37 @@ a:focus-visible{
   .capture-fab {
     padding: var(--space-4) var(--space-6);
     font-size: var(--fs-base);
-    min-width: 120px;
+    min-width: 80px;
+  }
+}
+/* ---------- Touch Device Optimizations ---------- */
+@media (hover: none) and (pointer: coarse) {
+  /* Increase touch targets */
+  .btn {
+    min-height: 48px;
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .icon-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .style-card {
+    min-height: 88px;
+  }
+
+  /* Remove hover effects that don't work on touch */
+  .btn::before,
+  .style-card::before {
+    display: none;
+  }
+
+  /* Adjust transitions for touch */
+  .btn,
+  .style-card,
+  .card {
+    transition: transform var(--transition-fast);
   }
 }
 
@@ -1224,7 +1279,9 @@ a:focus-visible{
     transform: translateY(0);
   }
 }
-
+.camera-page{
+  margin-top: var(--space-8);
+}
 
 
 @keyframes scaleIn {
@@ -1238,9 +1295,8 @@ a:focus-visible{
   }
 }
 
-/* Apply entrance animations */
+
 .camera-page,
-.result-page,
 .style-page,
 .processing-page,
 .print-page{
@@ -1352,53 +1408,7 @@ a:focus-visible{
 }
 
 
-.style-controls h2{
-  text-align: center;
-  background: linear-gradient(135deg, var(--text-primary), var(--brand-primary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: var(--space-4);
-}
 
-.style-controls .tip{
-  text-align: center;
-  margin-bottom: var(--space-8);
-  font-size: var(--fs-lg);
-  color: var(--text-tertiary);
-}
-
-
-
-.style-actions .btn{
-  width: 100%;
-  padding: var(--space-4) var(--space-6);
-  font-size: var(--fs-base);
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  border-radius: var(--radius-lg);
-  gap: var(--space-2);
-  position: relative;
-  overflow: hidden;
-}
-
-.style-actions .btn-primary{
-  background: var(--gradient-primary);
-  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
-  border: 2px solid transparent;
-}
-
-.style-actions .btn-primary:hover{
-  transform: translateY(-4px);
-  box-shadow: 0 16px 48px rgba(102, 126, 234, 0.4);
-}
-
-.style-actions .btn:disabled{
-  background: var(--surface-secondary);
-  color: var(--text-muted);
-  box-shadow: none;
-  cursor: not-allowed;
-}
 /* Enhanced Processing Layout */
 .processing-container{
   max-width: 600px;
@@ -1621,21 +1631,13 @@ a:focus-visible{
 
 /* Responsive */
 @media (max-width: 1024px) {
+.body{overscroll-behavior: none;}
   .multi-page {
     padding: var(--space-8) var(--space-4);
   }
 }
 
-@media (max-width: 768px) {
-  .prompt-grid {
-    grid-template-columns: 1fr;
-    gap: var(--space-4);
-  }
-  .actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
+
 
 /* High-contrast users */
 @media (prefers-contrast: high) {
@@ -1682,4 +1684,233 @@ a:focus-visible{
   object-fit: contain;
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
+}
+.rtl-loading [data-i18n] {
+  visibility: hidden;
+}
+
+.rtl-loading.i18n-loaded [data-i18n] {
+  visibility: visible;
+}
+/* Brand Wordmark */
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+
+.brand-text {
+  font-family: 'Pacifico', cursive;
+  font-size: 1.5rem;                     /* nice size */
+  font-weight: 300;
+  background: linear-gradient(90deg, #667eea, #764ba2); /* same gradient as before */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-fill-color: transparent;
+  display: inline-block;
+  letter-spacing: 1px;
+  text-decoration: none;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.brand-text:hover {
+  transform: scale(1.05);
+  filter: brightness(1.2);
+}
+/* For tablets and average-to-large phones (portrait/landscape) */
+@media (max-width: 1024px) {
+ .brand-text { font-size: 1.6rem; letter-spacing: 0.3px; }
+}
+
+/* Specifically target iPhone 11 / 12 Pro Max class (≈390–430px width) */
+/* iPhone 11, 12, 13, 14 series optimizations */
+@media (max-width: 430px) {
+.body{overscroll-behavior: none;}
+  .app-nav {
+    padding: var(--space-3) var(--space-4);
+    height: 70px;
+    gap: var(--space-3);
+  }
+
+  .app-main {
+    padding-top: 90px; /* Ensure content clears navbar */
+  }
+
+  .brand-text {
+    font-size: 1.2rem;
+    letter-spacing: 0.3px;
+  }
+
+  /* Icon buttons smaller */
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .icon-btn img {
+    width: 18px;
+    height: 18px;
+  }
+
+  #themeToggle {
+    width: 38px;
+    height: 38px;
+  }
+  #themeToggle svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Container padding */
+  .container {
+    padding: 0 var(--space-3);
+  }
+
+  /* Cards with less padding */
+  .card {
+    padding: var(--space-5);
+    border-radius: var(--radius-xl);
+  }
+
+  .controls-container {
+    padding: var(--space-5);
+    margin: var(--space-3);
+    gap: var(--space-5);
+  }
+
+  /* Video adjustments */
+  video {
+    min-height: 280px;
+    max-height: 45vh;
+  }
+
+  /* Style cards more compact */
+  .style-card {
+    padding: var(--space-4);
+    min-height: 80px;
+  }
+
+  .style-icon {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-1);
+  }
+
+  .style-title {
+    font-size: var(--fs-sm);
+  }
+
+  .style-desc {
+    font-size: 0.7rem;
+  }
+
+  /* Capture button adjustments */
+  .capture-fab {
+    width: 60px;
+    height: 60px;
+    bottom: var(--space-6);
+  }
+
+  .capture-fab::after {
+    content: "";
+    font-size: 18px;
+  }
+
+  /* Typography adjustments */
+  h2 {
+    font-size: var(--fs-2xl);
+    margin-bottom: var(--space-4);
+  }
+
+  h3 {
+    font-size: var(--fs-xl);
+    margin-bottom: var(--space-3);
+  }
+
+  .review-title {
+    font-size: var(--fs-3xl);
+    margin-bottom: var(--space-4);
+  }
+
+  /* Processing improvements */
+  .processing-container {
+    padding: var(--space-6) var(--space-4);
+    margin: var(--space-3);
+  }
+
+  /* Toast positioning */
+  #toastHost {
+    left: var(--space-2);
+    right: var(--space-2);
+    top: var(--space-2);
+  }
+}
+
+/* Container */
+div > button {
+  margin: 0.5rem;
+}
+
+/* Primary Button (Print stickers) */
+.primary-btn {
+  background: linear-gradient(135deg, var(--primary-gradient-start, #667eea), var(--primary-gradient-end, #764ba2));
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 200ms ease, background-color 120ms ease;
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+}
+
+.primary-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Ghost Button (Start new session) */
+.ghost-btn {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--accent, #00f5ff);
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  border: 1.5px solid var(--accent, #00f5ff);
+  border-radius: 1.5rem;
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease;
+}
+
+.ghost-btn:hover {
+  background: rgba(0, 245, 255, 0.1);
+  border-color: #00f5ff;
+  transform: translateY(-2px);
+}
+
+.ghost-btn:active {
+  transform: scale(0.97);
+  background: rgba(0, 245, 255, 0.2);
+}
+@media (max-width: 390px) {
+  /* Extra small phones - iPhone SE, etc. */
+  .brand-text {
+    font-size: 1.1rem;
+  }
+
+  .capture-fab {
+    width: 70px;
+    height: 70px;
+  }
+
+  .capture-fab::after {
+    width: 55px;
+    height: 55px;
+  }
+
+  .controls-container {
+    padding: var(--space-4);
+  }
 }

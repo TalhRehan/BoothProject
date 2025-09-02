@@ -1,3 +1,4 @@
+//camera.js
 (function () {
   // --- DOM refs ---
   const video         = document.getElementById('video');

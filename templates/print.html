@@ -1,24 +1,43 @@
-<!-- ============================ print.html (UPDATED) ============================ -->
 {% extends 'base.html' %}
+
 {% block header_actions %}
+  <!-- ========== HEADER ACTIONS ==========
+       - Print: triggers browser print using pre-rendered A4 PNG
+       - New session: returns user to a clean workflow (handled in print.js/app)
+  -->
   <div>
-    <button id="browserPrintBtn" class="primary-btn">Print stickers</button>
-    <button id="newSessionBtn" class="ghost-btn">Start new session</button>
+    <button id="browserPrintBtn" class="primary-btn" data-i18n="print.printStickers">Print stickers</button>
+    <button id="newSessionBtn" class="ghost-btn" data-i18n="print.startNewSession">Start new session</button>
   </div>
 {% endblock %}
 
 {% block content %}
 <div class="print-page">
-  <!-- High-res compositor: 2480×3508 ≈ 300 dpi A4. Hidden; we print the rasterized PNG below -->
+
+  <!-- ========== OFFSCREEN A4 COMPOSITOR ==========
+       High-res canvas used to assemble the final sheet at print quality.
+       2480×3508 px ≈ A4 at 300 DPI (width 210mm, height 297mm).
+       Hidden in UI; the rasterized PNG from this canvas is shown below.
+  -->
   <canvas id="a4Canvas" width="2480" height="3508" hidden></canvas>
 
-  <!-- The single element we print. On screen it’s a normal, responsive preview; in print it becomes fixed A4 via CSS -->
-  <figure class="print-sheet" aria-label="Printable A4 sheet">
-    <img id="a4Preview" alt="A4 print preview (2×2 stickers with cut lines)" />
+  <!-- ========== PRINT PREVIEW / OUTPUT TARGET ==========
+       - On screen: responsive preview of the PNG rendered from a4Canvas
+       - In print media: CSS fixes this element to A4 size/margins
+       - Accessibility/i18n:
+           * data-i18n-aria maps to aria-label via your i18n system
+           * data-i18n-alt supplies translated alt text for the image
+  -->
+  <figure class="print-sheet" data-i18n-aria="print.printableSheet">
+    <img id="a4Preview" data-i18n-alt="print.previewAlt" />
   </figure>
 </div>
 {% endblock %}
 
 {% block scripts %}
+<!-- ========== PAGE SCRIPT ==========
+     Handles: composing to a4Canvas, exporting PNG, populating #a4Preview,
+     wiring print button, and any session-reset logic.
+-->
 <script src="{{ url_for('static', filename='js/print.js') }}" defer></script>
 {% endblock %}

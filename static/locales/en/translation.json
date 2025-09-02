@@ -1,0 +1,75 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "applySettings": "Apply Settings",
+    "generate": "Generate",
+    "back": "Back",
+    "retake": "Retake",
+    "preparing": "Preparing…"
+  },
+  "brand": {
+    "title": "Sticker Booth"
+  },
+  "settings": {
+    "title": "Camera Settings",
+    "subtitle": "Adjust your camera preferences for the best experience",
+    "cameraDevice": "Camera Device",
+    "cameraHelp": "Choose which camera to use for capturing photos",
+    "videoQuality": "Video Quality",
+    "qualityHelp": "Higher quality may be slower on some devices",
+    "language": "Language",
+    "languageHelp": "Choose your preferred language",
+    "english": "English",
+    "arabic": "العربية"
+  },
+  "camera": {
+    "quickTips": "Quick Tips",
+    "goodLighting": "Good Lighting",
+    "goodLightingDesc": "Face a window or bright light source for best results",
+    "centerYourself": "Center Yourself",
+    "centerYourselfDesc": "Keep your face centered in the frame",
+    "smile": "Smile!",
+    "smileDesc": "Express yourself - the AI works better with clear expressions"
+  },
+  "review": {
+    "title": "How does this look?",
+    "tip": "If it's not right, retake; otherwise continue to choose a style."
+  },
+  "style": {
+    "title": "Select your sticker style",
+    "activeStyle": "Active style:",
+    "realisticCutout": "Realistic cutout",
+    "realisticCutoutDesc": "Background removed, clean edges, white border.",
+    "cartoonize": "Cartoonize",
+    "cartoonizeDesc": "Convert to cartoon/illustration with smooth lines.",
+    "textIcons": "Text & icons",
+    "textIconsDesc": "Overlays like \"Super Girl\", \"Queen\", crowns & sparkles.",
+    "generateSticker": "Generate sticker"
+  },
+  "multi": {
+    "image1": "Image 1",
+    "image2": "Image 2",
+    "image3": "Image 3",
+    "image4": "Image 4",
+    "placeholder1": "e.g., Make sure the person is riding a horse.",
+    "placeholder2": "e.g., Make sure the person is riding a bicycle.",
+    "placeholder3": "e.g., Make sure the person is in an airplane.",
+    "placeholder4": "e.g., Make sure the person is riding a camel."
+  },
+  "processing": {
+    "title": "AI is working its magic…",
+    "style": "Style:",
+    "remaining": "remaining",
+    "cancel": "Cancel Generation",
+    "keepFocus": "Please keep this window in focus while we generate your stickers."
+  },
+  "print": {
+    "printStickers": "Print stickers",
+    "startNewSession": "Start new session"
+  },
+  "quality": {
+    "hd720": "HD (720p) - Recommended",
+    "fhd1080": "Full HD (1080p) - Best Quality",
+    "sd480": "SD (480p) - Faster"
+  }
+}

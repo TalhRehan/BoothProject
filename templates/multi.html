@@ -2,41 +2,69 @@
 
 {% block content %}
 <div class="multi-page">
+  <!-- ========== HEADER: shows the currently selected style ========== -->
   <header class="multi-header">
-    <p class="subtle">Active style: <strong>{{ style_label }}</strong></p>
+    <p class="subtle">
+      <span data-i18n="style.activeStyle">Active style:</span>
+      <strong>{{ style_label }}</strong>
+    </p>
   </header>
 
+  <!-- ========== MULTI-PROMPT FORM ========== -->
+  <!-- novalidate: validation handled in JS (multi.js) -->
   <form id="multiForm" class="multi-form" novalidate>
+    <!-- Grid of prompt inputs for 1–4 images -->
     <div class="prompt-grid">
+
+      <!-- Prompt 1 -->
       <div class="prompt-field">
-        <label for="p1">Image 1</label>
-        <textarea id="p1" name="p1" rows="3" placeholder="e.g., Make sure the person is riding a horse."></textarea>
+        <label for="p1" data-i18n="multi.image1">Image 1</label>
+        <!-- Placeholder text comes from i18n via data-i18n-placeholder -->
+        <textarea id="p1" name="p1" rows="3" data-i18n-placeholder="multi.placeholder1"></textarea>
       </div>
 
+      <!-- Prompt 2 -->
+      <div class="prompt-field">
+        <label for="p2" data-i18n="multi.image2">Image 2</label>
+        <textarea id="p2" name="p2" rows="3" data-i18n-placeholder="multi.placeholder2"></textarea>
+      </div>
 
+      <!-- Prompt 3 -->
       <div class="prompt-field">
-        <label for="p2">Image 2</label>
-        <textarea id="p2" name="p2" rows="3" placeholder="e.g., Make sure the person is riding a bicycle."></textarea>
+        <label for="p3" data-i18n="multi.image3">Image 3</label>
+        <textarea id="p3" name="p3" rows="3" data-i18n-placeholder="multi.placeholder3"></textarea>
       </div>
+
+      <!-- Prompt 4 -->
       <div class="prompt-field">
-        <label for="p3">Image 3</label>
-        <textarea id="p3" name="p3" rows="3" placeholder="e.g., Make sure the person is in an airplane."></textarea>
-      </div>
-      <div class="prompt-field">
-        <label for="p4">Image 4</label>
-        <textarea id="p4" name="p4" rows="3" placeholder="e.g., Make sure the person is riding a camel."></textarea>
+        <label for="p4" data-i18n="multi.image4">Image 4</label>
+        <textarea id="p4" name="p4" rows="3" data-i18n-placeholder="multi.placeholder4"></textarea>
       </div>
     </div>
 
+    <!-- ========== FORM ACTIONS ========== -->
     <div class="actions">
-      <button id="generateMultiBtn" type="submit" class="btn btn-primary">Generate</button>
-      <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ url_for('style_select') }}'">Back</button>
+      <!-- Submit: triggers generation flow in multi.js -->
+      <button id="generateMultiBtn" type="submit" class="btn btn-primary" data-i18n="common.generate">
+        Generate
+      </button>
+
+      <!-- Back: returns to style selection (no form submit) -->
+      <button type="button"
+              class="btn btn-secondary"
+              onclick="window.location.href='{{ url_for('style_select') }}'"
+              data-i18n="common.back">
+        Back
+      </button>
     </div>
   </form>
 </div>
 {% endblock %}
 
 {% block scripts %}
+<!-- Page stylesheet (kept here in case base.html styles are split per-page) -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+<!-- Page logic (handles submit, validation, i18n placeholders, etc.) -->
 <script src="{{ url_for('static', filename='js/multi.js') }}" defer></script>
 {% endblock %}

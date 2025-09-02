@@ -1,10 +1,13 @@
 {% extends 'base.html' %}
 {% block title %}Camera - Sticker Booth{% endblock %}
+
 {% block content %}
 <div class="camera-page">
   <div class="camera-interface">
-    <!-- Video Container -->
+
+    <!-- ========== VIDEO PREVIEW SECTION ========== -->
     <div class="video-container">
+      <!-- Live video feed from camera -->
       <video id="video"
              autoplay
              playsinline
@@ -12,55 +15,69 @@
              aria-label="Camera preview">
       </video>
 
-      <!-- Countdown Overlay -->
+      <!-- Countdown overlay (shown before capture) -->
       <div id="overlay" class="overlay" style="display: none;" role="status" aria-live="polite">
         <div id="countdown" class="countdown" aria-label="Countdown">5</div>
       </div>
 
-      <!-- Capture Button -->
+      <!-- Floating Capture Button -->
       <button id="captureBtn"
               class="capture-fab"
               type="button"
               aria-label="Capture photo">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+        <!-- Camera icon (SVG) -->
+        <svg width="24" height="24" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2"
+             aria-hidden="true">
+          <path d="M23 19a2 2 0 0 1-2 2H3..."/>
           <circle cx="12" cy="13" r="4"/>
         </svg>
-
       </button>
     </div>
   </div>
 
-  <!-- Quick Tips Card -->
+  <!-- ========== QUICK TIPS SECTION ========== -->
   <div class="card tips-card mt-8">
-    <h3>💡 Quick Tips</h3>
+    <h3><span data-i18n="camera.quickTips">💡 Quick Tips</span></h3>
     <div class="tips-grid">
+
+      <!-- Tip: Good lighting -->
       <div class="tip-item">
         <div class="tip-icon">📸</div>
         <div class="tip-content">
-          <strong>Good Lighting</strong>
-          <p>Face a window or bright light source for best results</p>
+          <strong data-i18n="camera.goodLighting">Good Lighting</strong>
+          <p data-i18n="camera.goodLightingDesc">
+            Face a window or bright light source for best results
+          </p>
         </div>
       </div>
+
+      <!-- Tip: Center yourself -->
       <div class="tip-item">
         <div class="tip-icon">👤</div>
         <div class="tip-content">
-          <strong>Center Yourself</strong>
-          <p>Keep your face centered in the frame</p>
+          <strong data-i18n="camera.centerYourself">Center Yourself</strong>
+          <p data-i18n="camera.centerYourselfDesc">
+            Keep your face centered in the frame
+          </p>
         </div>
       </div>
+
+      <!-- Tip: Smile -->
       <div class="tip-item">
         <div class="tip-icon">😊</div>
         <div class="tip-content">
-          <strong>Smile!</strong>
-          <p>Express yourself - the AI works better with clear expressions</p>
+          <strong data-i18n="camera.smile">Smile!</strong>
+          <p data-i18n="camera.smileDesc">
+            Express yourself - the AI works better with clear expressions
+          </p>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Hidden Elements -->
+<!-- ========== HIDDEN CANVAS (used for image capture) ========== -->
 <canvas id="captureCanvas"
         width="1280"
         height="960"
@@ -70,20 +87,22 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- Camera logic (stream setup, capture, etc.) -->
 <script src="{{ url_for('static', filename='js/camera.js') }}?v={{ cache_bust_version | default('2024') }}" defer></script>
 
-<!-- Camera Page Script (no settings modal wiring here) -->
+<!-- Camera Page Inline Script -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   'use strict';
 
-  // Capture button vibration feedback
+  // === Capture button haptic feedback ===
   const captureBtn = document.getElementById('captureBtn');
   if (captureBtn && 'vibrate' in navigator) {
     captureBtn.addEventListener('click', () => navigator.vibrate(50));
   }
 
-  // Keyboard shortcuts
+  // === Keyboard shortcuts ===
+  // Space or Enter triggers capture when focused on body
   document.addEventListener('keydown', (e) => {
     if ((e.key === ' ' || e.key === 'Enter') && e.target === document.body) {
       e.preventDefault();
@@ -91,7 +110,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Page visibility handling
+  // === Page visibility handling ===
+  // Pause/resume camera when tab is hidden/visible
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
       if (window.resumeCamera) window.resumeCamera();

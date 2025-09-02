@@ -1,4 +1,4 @@
-// static/js/style.js
+//style.js
 (function () {
   const container = document.getElementById('styleCards');
   const cards = Array.from(document.querySelectorAll('.style-card'));
@@ -82,7 +82,8 @@
     posting = true;
     applySelection(); // disables button
     const prevLabel = generateBtn.textContent;
-    generateBtn.textContent = 'Preparing…';
+    generateBtn.textContent = window.i18n?.t('common.preparing') || 'Preparing…';
+
 
     try {
       const res = await fetch('/style', {

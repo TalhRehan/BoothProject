@@ -1,19 +1,45 @@
 {% extends 'base.html' %}
+{# Inherit the base layout so the page keeps consistent styling and structure. #}
+
 {% block content %}
 <div class="review-layout">
+  {# Main layout container for the review screen. Likely uses CSS grid or flexbox. #}
+
   <div class="left-pane">
-    <!-- unified frame -->
+    <!-- Left-hand side: displays captured photo inside a styled frame -->
     <div class="photo-frame large frame">
-      <img src="{{ image_data }}" alt="Captured preview" class="frame-image"/>
+      <img src="{{ image_data }}"
+           alt="Captured preview"
+           class="frame-image"/>
+      {# `image_data` contains the preview image (e.g., base64 or URL).
+         The alt text makes the image accessible. #}
     </div>
   </div>
 
   <div class="controls-container">
-    <h2 class="review-title">How does this look?</h2>
-    <p class="tip">If it’s not right, retake; otherwise continue to choose a style.</p>
+    <!-- Title prompting user for confirmation -->
+    <h2 class="review-title" data-i18n="review.title">How does this look?</h2>
+
+    <!-- Instruction/tip for user -->
+    <p class="tip" data-i18n="review.tip">
+      If it’s not right, retake; otherwise continue to choose a style.
+    </p>
+
+    <!-- Action buttons -->
     <div class="controls">
-      <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('camera') }}'">Retake</button>
-      <button class="btn btn-primary" onclick="window.location.href='{{ url_for('style_select') }}'">Generate</button>
+      <!-- Retake button: navigates back to camera capture -->
+      <button class="btn btn-secondary"
+              onclick="window.location.href='{{ url_for('camera') }}'"
+              data-i18n="common.retake">
+        Retake
+      </button>
+
+      <!-- Generate button: proceeds to style selection step -->
+      <button class="btn btn-primary"
+              onclick="window.location.href='{{ url_for('style_select') }}'"
+              data-i18n="common.generate">
+        Generate
+      </button>
     </div>
   </div>
 </div>

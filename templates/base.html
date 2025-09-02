@@ -1,54 +1,48 @@
 <!doctype html>
 <html lang="en">
 <head>
+    <!-- Metadata & document setup -->
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Sticker Booth</title>
+
+    <!-- Main stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"/>
 
-    <!-- Script font (Instagram-like) -->
+    <!-- Decorative script-like font (Instagram-inspired) -->
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
 </head>
 <body>
-<!-- Navbar -->
+
+<!-- ================= NAVBAR ================= -->
 <header class="app-header" role="navigation" aria-label="Primary">
     <nav class="app-nav">
+        <!-- Left section (currently empty, reserved for future items) -->
         <div class="nav-left" aria-hidden="true"></div>
 
+        <!-- Centered brand / logo -->
         <div class="nav-center">
-          <a class="brand" href="{{ url_for('camera') }}" aria-label="Sticker Booth">
-              <svg viewBox="0 0 320 80" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sticker Booth">
-                <defs>
-                  <linearGradient id="brandGradient" x1="0" y1="0" x2="320" y2="0" gradientUnits="userSpaceOnUse">
-                    <stop stop-color="#667eea"/>
-                    <stop offset="1" stop-color="#764ba2"/>
-                  </linearGradient>
-                </defs>
-                <!-- Wordmark only (Instagram-like script) -->
-                <text x="0" y="52"
-                      font-family="'Pacifico', cursive"
-                      font-size="42"
-                      font-weight="400"
-                      fill="url(#brandGradient)">
-                  Sticker Booth
-                </text>
-              </svg>
-          </a>
+            <a class="brand" href="{{ url_for('camera') }}" aria-label="Sticker Booth">
+                <span class="brand-text" data-i18n="brand.title">Sticker Booth</span>
+            </a>
         </div>
 
+        <!-- Right-side actions (theme toggle, settings, custom header actions) -->
         <div class="nav-right">
-            <!-- Theme toggle -->
+
+            <!-- Theme toggle button -->
             <button id="themeToggle" class="icon-btn" aria-pressed="false" aria-label="Toggle theme"
                     title="Toggle theme">
                 <img id="themeIcon" alt="Theme" src="{{ url_for('static', filename='img/dark_mode.png') }}">
             </button>
 
-            <!-- Settings (theme-aware icon) -->
+            <!-- Settings button (theme-aware icon) -->
             <button id="settingsBtn" class="icon-btn" aria-label="Settings" title="Settings">
                 <img id="settingsIcon" alt="Settings"
                      src="{{ url_for('static', filename='img/darkThemeSettings.png') }}">
             </button>
 
+            <!-- Extra actions injected per page -->
             <div class="header-actions">
                 {% block header_actions %}{% endblock %}
             </div>
@@ -56,26 +50,30 @@
     </nav>
 </header>
 
+<!-- ================= MAIN CONTENT ================= -->
 <main class="app-main container">
     {% block content %}{% endblock %}
 </main>
 
+<!-- Toast notifications container -->
 <div id="toastHost" aria-live="polite" aria-atomic="true"></div>
 
-<!-- Settings Modal (shared across pages) -->
+<!-- ================= SETTINGS MODAL ================= -->
 <dialog id="settingsModal" class="modal" role="dialog" aria-labelledby="settingsTitle" aria-modal="true">
     <form method="dialog">
+        <!-- Modal header -->
         <div class="modal-header">
-            <h3 id="settingsTitle">Camera Settings</h3>
-            <p class="modal-subtitle">Adjust your camera preferences for the best experience</p>
+            <h3 id="settingsTitle" data-i18n="settings.title">Camera Settings</h3>
         </div>
 
+        <!-- Modal body with form controls -->
         <div class="modal-body">
+            <!-- Camera device selector -->
             <div class="form-group">
-                <label for="cameraSelect" class="form-label">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                         aria-hidden="true">
-                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <label for="cameraSelect" class="form-label" data-i18n="settings.cameraDevice">
+                    <!-- Camera icon (SVG) -->
+                    <svg width="16" height="16" ... aria-hidden="true">
+                        <path d="M23 19a2 2 0 0 1-2 2H3..."/>
                         <circle cx="12" cy="13" r="4"/>
                     </svg>
                     Camera Device
@@ -83,33 +81,57 @@
                 <select id="cameraSelect" class="form-select" aria-describedby="cameraHelp">
                     <option value="">Loading cameras...</option>
                 </select>
-                <p id="cameraHelp" class="form-help">Choose which camera to use for capturing photos</p>
+                <p id="cameraHelp" class="form-help" data-i18n="settings.cameraHelp">
+                    Choose which camera to use for capturing photos
+                </p>
             </div>
 
+            <!-- Video quality selector -->
             <div class="form-group">
-                <label for="qualitySelect" class="form-label">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                         aria-hidden="true">
+                <label for="qualitySelect" class="form-label" data-i18n="settings.videoQuality">
+                    <!-- Video icon (SVG) -->
+                    <svg width="16" height="16" ... aria-hidden="true">
                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                         <circle cx="9" cy="9" r="2"/>
-                        <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                        <path d="M21 15l-3.086-3.086..."/>
                     </svg>
                     Video Quality
                 </label>
                 <select id="qualitySelect" class="form-select" aria-describedby="qualityHelp">
-                    <option value="720p">HD (720p) - Recommended</option>
-                    <option value="1080p">Full HD (1080p) - Best Quality</option>
-                    <option value="480p">SD (480p) - Faster</option>
+                    <option value="720p" data-i18n="quality.hd720">HD (720p) - Recommended</option>
+                    <option value="1080p" data-i18n="quality.fhd1080">Full HD (1080p) - Best Quality</option>
+                    <option value="480p" data-i18n="quality.sd480">SD (480p) - Faster</option>
                 </select>
-                <p id="qualityHelp" class="form-help">Higher quality may be slower on some devices</p>
+                <p id="qualityHelp" class="form-help" data-i18n="settings.qualityHelp">
+                    Higher quality may be slower on some devices
+                </p>
+            </div>
+
+            <!-- Language selector -->
+            <div class="form-group">
+                <label for="languageSelect" class="form-label">
+                    <svg width="16" height="16" ... aria-hidden="true">
+                        <path d="M5 8l6 6 6-6"/>
+                    </svg>
+                    <span data-i18n="settings.language">Language</span>
+                </label>
+                <select id="languageSelect" class="form-select" aria-describedby="languageHelp">
+                    <option value="en" data-i18n="settings.english">English</option>
+                    <option value="ar" data-i18n="settings.arabic">العربية</option>
+                </select>
             </div>
         </div>
 
+        <!-- Modal actions -->
         <div class="modal-actions">
-            <button type="button" value="cancel" class="btn btn-ghost" data-action="cancel">Cancel</button>
-            <button type="button" id="applySettings" value="apply" class="btn btn-primary" data-action="apply">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                     aria-hidden="true">
+            <button type="button" value="cancel" class="btn btn-ghost"
+                    data-action="cancel" data-i18n="common.cancel">
+                Cancel
+            </button>
+            <button type="button" id="applySettings" value="apply" class="btn btn-primary"
+                    data-action="apply" data-i18n="common.applySettings">
+                <!-- Checkmark icon -->
+                <svg width="16" height="16" ... aria-hidden="true">
                     <polyline points="20,6 9,17 4,12"/>
                 </svg>
                 Apply Settings
@@ -118,7 +140,9 @@
     </form>
 </dialog>
 
-<!-- Theme bootstrap -->
+<!-- ================= SCRIPTS ================= -->
+
+<!-- Theme initialization and toggle logic -->
 <script>
     (function(){
       const root = document.documentElement;
@@ -127,16 +151,19 @@
       const iconImg = document.getElementById('themeIcon');
       const settingsImg = document.getElementById('settingsIcon');
 
+      // Icon paths for light/dark modes
       const LIGHT_ICON = "{{ url_for('static', filename='img/light_mode.png') }}";
       const DARK_ICON  = "{{ url_for('static', filename='img/dark_mode.png') }}";
       const LIGHT_SETTINGS = "{{ url_for('static', filename='img/lightThemeSettings.png') }}";
       const DARK_SETTINGS  = "{{ url_for('static', filename='img/darkThemeSettings.png') }}";
 
+      // Helper to update icons
       function setIcons(theme) {
         iconImg.src = theme === 'light' ? LIGHT_ICON : DARK_ICON;
         settingsImg.src = theme === 'light' ? LIGHT_SETTINGS : DARK_SETTINGS;
       }
 
+      // Apply theme
       function apply(theme) {
         root.setAttribute('data-theme', theme);
         setIcons(theme);
@@ -144,6 +171,7 @@
         try { localStorage.setItem(STORAGE_KEY, theme); } catch {}
       }
 
+      // Initialize theme (localStorage or system preference)
       let theme = 'dark';
       try {
         theme = localStorage.getItem(STORAGE_KEY) ||
@@ -151,29 +179,33 @@
       } catch {}
       apply(theme);
 
+      // Toggle theme on button click
       btn?.addEventListener('click', () => {
         apply(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
       });
     })();
 </script>
 
-<!-- Settings modal wiring (site-wide) -->
+<!-- Settings modal behavior -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
       const settingsBtn = document.getElementById('settingsBtn');
       const settingsModal = document.getElementById('settingsModal');
       if (!settingsBtn || !settingsModal || !settingsModal.showModal) return;
 
+      // Open modal on button click
       settingsBtn.addEventListener('click', () => {
         settingsModal.showModal();
         const firstInput = settingsModal.querySelector('select, input, button');
         if (firstInput) setTimeout(() => firstInput.focus(), 100);
       });
 
+      // Close modal when clicking backdrop
       settingsModal.addEventListener('click', (e) => {
         if (e.target === settingsModal) settingsModal.close();
       });
 
+      // Wire cancel/apply buttons
       const cancelBtn = settingsModal.querySelector('[data-action="cancel"]');
       const applyBtn  = settingsModal.querySelector('[data-action="apply"]');
       cancelBtn?.addEventListener('click', () => settingsModal.close());
@@ -182,12 +214,30 @@
         if (window.toast) window.toast.success('Camera settings updated successfully!');
       });
 
+      // Allow ESC key to close modal
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && settingsModal.open) settingsModal.close();
       });
     });
 </script>
 
+<!-- Language preference setup -->
+<script>
+    (function(){
+      const lang = localStorage.getItem('preferred_language') || 'en';
+      if (lang === 'ar') {
+        document.documentElement.setAttribute('lang', 'ar');
+        document.documentElement.classList.add('rtl-loading');
+        document.body.style.fontFamily = 'Tajawal, Cairo, "Noto Sans Arabic", Arial, sans-serif';
+      }
+    })();
+</script>
+
+<!-- Internationalization (i18n) system -->
+<script src="{{ url_for('static', filename='js/i18n.js') }}?v={{ cache_bust_version | default('2024') }}"
+        defer></script>
+
+<!-- Page-specific scripts injected here -->
 {% block scripts %}{% endblock %}
 </body>
 </html>

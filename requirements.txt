@@ -5,3 +5,6 @@ Pillow
 reportlab
 opencv-python
 numpy
+openai
+
+
