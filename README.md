@@ -1,1 +1,1 @@
-This is simple booth project using the apii
+This is simple booth project using the api
